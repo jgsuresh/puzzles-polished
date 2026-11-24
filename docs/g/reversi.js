@@ -1,5 +1,5 @@
 // Reversi (Othello): sandwich the other colour's discs to flip them; most discs wins.
-import { h } from './core.js?v=fdcac117';
+import { h } from './core.js?v=fece9af1';
 
 const N = 8;
 const DIRS8 = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];

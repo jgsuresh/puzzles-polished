@@ -13,9 +13,11 @@ import loa from '../web/games/loa.js';
 import slimetrail from '../web/games/slimetrail.js';
 import epaminondas, { genMoves, landing } from '../web/games/epaminondas.js';
 import nex from '../web/games/nex.js';
+import campaign from '../web/games/campaign.js';
+import jade, { judge } from '../web/games/jade.js';
 import { place } from '../web/games/goengine.js';
 
-const ALL = { hex, y, havannah, gomoku, reversi, amazons, go, gonnect, loa, slimetrail, nex, epaminondas };
+const ALL = { hex, y, havannah, gomoku, reversi, amazons, go, gonnect, loa, slimetrail, nex, epaminondas, campaign, jade };
 const play = (def, s, ...moves) => moves.reduce((st, m) => def.apply(st, m), s);
 
 test('every game finishes from random play and never offers an illegal state', () => {
@@ -295,4 +297,49 @@ test('nex: both move types, endgame single moves, win detection', () => {
     if (r < 4) w = nex.apply(w, [r * 5 + 4, r * 5 + 3]);
   }
   assert.equal(nex.result(w)?.winner, 0);
+});
+
+test('campaign: drops, knight jumps leave markers, five in a row wins, stranded loses', () => {
+  let s = campaign.init({ n: 8 });
+  assert.equal(campaign.moves(s).length, 64);
+  s = campaign.apply(s, 0);                         // red drops at a1
+  assert.ok(!campaign.moves(s).includes(0));        // blue can't drop on red's knight
+  s = campaign.apply(s, 63);                        // blue drops at h8
+  const jumps = campaign.moves(s);
+  assert.deepEqual(jumps.sort((a, b) => a - b), [10, 17]);   // red knight from a1
+  s = campaign.apply(s, 17);
+  assert.equal(s.b[0], 1);                          // marker left on the start square
+  // Five markers in a row for Red: markers at (1..4,3); the knight at (5,3) jumps away, leaving a fifth marker.
+  const d = new Uint8Array(64); for (let x = 1; x <= 4; x++) d[3 * 8 + x] = 1;
+  const s3 = { n: 8, b: d, knights: [3 * 8 + 5, 63], turn: 0, last: -1, moveCount: 5, won: -1 };
+  const away = campaign.moves(s3)[0];
+  assert.equal(campaign.result(campaign.apply(s3, away))?.winner, 0);
+  // Stranded: a knight in the corner whose two jumps are blocked loses.
+  const e = new Uint8Array(64); e[10] = 2; e[17] = 2;
+  const s4 = { n: 8, b: e, knights: [0, 63], turn: 0, last: -1, moveCount: 5, won: -1 };
+  assert.equal(campaign.result(s4)?.winner, 1);
+});
+
+test('jade: cross needs all four edges, parallel needs both colours across', () => {
+  const W = 7, H = 5, idx = (x, y) => y * W + x;
+  // A white column from top to bottom plus a white row from left to right is one connected group touching all edges.
+  const b = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) b[idx(0, y)] = 1;          // left column: touches left, top and bottom
+  for (let x = 0; x < W; x++) b[idx(x, 2)] = 1;          // middle row: reaches the right edge
+  assert.deepEqual(judge(b, W, H), { cross: true, parallel: false });
+  // Parallel: a white and a black chain both top-to-bottom.
+  const p = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) { p[idx(1, y)] = 1; p[idx(5, y)] = 2; }
+  assert.deepEqual(judge(p, W, H), { cross: false, parallel: true });
+  // One colour alone isn't enough.
+  const q = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) q[idx(1, y)] = 1;
+  assert.deepEqual(judge(q, W, H), { cross: false, parallel: false });
+  // The engine awards the win to the right player and either colour may be dropped.
+  let s = jade.init({ size: '7x5' });
+  assert.equal(jade.moves(s).length, 2 * W * H);
+  for (let y = 0; y < H; y++) { s = jade.apply(s, [idx(1, y), 1]); if (y < H - 1) s = jade.apply(s, [idx(5, y), 2]); }
+  assert.equal(jade.result(s), null);
+  s = jade.apply(s, [idx(5, H - 1), 2]);
+  assert.equal(jade.result(s)?.winner, 1);
 });

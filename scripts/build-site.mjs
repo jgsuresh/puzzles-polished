@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { CATEGORIES, META } from './puzzles-meta.mjs';
 import { HINTS } from './hints.mjs';
-import { GAMES } from './games-meta.mjs';
+import { GAMES, SOON } from './games-meta.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const up = join(root, '.upstream');
@@ -102,15 +102,28 @@ for (const g of GAMES) {
   writeFileSync(join(out, 'g', `${g.name}.html`), bust(html));
 }
 
+// Placeholder pages for games we can't implement yet.
+const stpl = readFileSync(join(web, 'soon.html'), 'utf8');
+for (const g of SOON) {
+  const html = stpl
+    .replaceAll('{{TITLE}}', escText(g.title))
+    .replace('{{DESIGNER}}', () => escText(g.designer || ''))
+    .replace('{{KNOWN}}', () => escText(g.known))
+    .replace('{{MISSING}}', () => escText(g.missing));
+  writeFileSync(join(out, 'g', `${g.name}.html`), bust(html));
+}
+
 // ---- 4. Home page ----
 const data = [
   ...puzzles.map(({ name, title, description, objective, category }) => ({ name, title, description, objective, category })),
   ...GAMES.map(({ name, title, description, objective }) => ({ name, title, description, objective, category: 'twoplayer', href: `g/${name}.html` })),
+  ...SOON.map(({ name, title, known }) => ({ name, title, description: known, objective: '', category: 'twoplayer', href: `g/${name}.html`, soon: true })),
 ];
 writeFileSync(join(out, 'index.html'), bust(readFileSync(join(web, 'index.html'), 'utf8')
   .replace('{{COUNT}}', String(puzzles.length))
   .replace('{{GAMECOUNT}}', String(GAMES.length))
+  .replace('{{SOONCOUNT}}', String(SOON.length))
   .replace('{{DATA}}', () => jsonForScript(data))
   .replace('{{CATEGORIES}}', () => jsonForScript([...CATEGORIES, { id: 'twoplayer', label: 'Two-player' }]))));
 
-console.log(`Built ${puzzles.length} puzzles and ${GAMES.length} two-player games into docs/`);
+console.log(`Built ${puzzles.length} puzzles, ${GAMES.length} two-player games and ${SOON.length} placeholders into docs/`);

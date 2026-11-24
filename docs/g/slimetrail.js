@@ -1,6 +1,6 @@
 // Slimetrail (Bill Taylor): a single shared token crawls over a hex rhombus, blocking every cell it leaves.
 // The player whose goal corner the token enters wins, whoever moved it there.
-import { h } from './core.js?v=fdcac117';
+import { h } from './core.js?v=fece9af1';
 import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=0ac8f1ce';
 
 const cache = new Map();

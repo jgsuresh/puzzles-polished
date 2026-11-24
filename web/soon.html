@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{TITLE}} · Coming soon · Puzzles</title>
+<meta name="description" content="{{TITLE}} is not playable yet.">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('stg-theme'); } catch (e) {}
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+<link rel="stylesheet" href="../css/app.css">
+</head>
+<body class="page-soon">
+<header class="bar">
+  <a class="icon-btn" href="../" aria-label="All games" title="All games">
+    <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+  </a>
+  <h1 class="title">{{TITLE}}</h1>
+</header>
+<main class="soon-page">
+  <article class="soon-card">
+    <p class="soon-badge">Coming soon</p>
+    <h2>{{TITLE}}</h2>
+    <p class="soon-designer">{{DESIGNER}}</p>
+    <h3>What it is</h3>
+    <p>{{KNOWN}}</p>
+    <h3>Why it isn't playable yet</h3>
+    <p>{{MISSING}}</p>
+    <p class="soon-note">This game is on the two-player list of <em>Mathematical Games, Abstract Games</em> by João Pedro Neto and Jorge Nuno Silva. It will be added once its rules are pinned down.</p>
+    <a class="soon-back" href="../">Back to all games</a>
+  </article>
+</main>
+</body>
+</html>

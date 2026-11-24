@@ -1,5 +1,5 @@
 // Hex: Red joins top to bottom, Blue joins left to right. No draws are possible.
-import { h } from './core.js?v=fdcac117';
+import { h } from './core.js?v=fece9af1';
 import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=0ac8f1ce';
 
 const nbCache = new Map();

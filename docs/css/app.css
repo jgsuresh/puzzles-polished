@@ -696,3 +696,27 @@ dialog.sheet .shortcuts { color: var(--muted); font-size: .9rem; }
 .slime-token { fill: #6fd36f; stroke: #2e8a3e; stroke-width: .08; filter: drop-shadow(0 .06px .08px rgba(0,0,0,.35)); }
 .slime-shine { fill: rgba(255, 255, 255, .55); }
 .token { transition: transform .2s; }
+
+/* Jade / Campaign extras */
+.stone.preview { opacity: .6; }
+.marker.p0 { fill: var(--p0); }
+.marker.p1 { fill: var(--p1); }
+.marker { opacity: .85; pointer-events: none; }
+.queen.kn { font-size: .55px; }
+.stone.p0 + .kn, .stone.p1 + .kn { fill: #fff; }
+
+/* Placeholder ("coming soon") cards and pages */
+.thumb.soon { display: grid; place-items: center; background: repeating-linear-gradient(135deg, var(--surface-2), var(--surface-2) 10px, var(--surface) 10px, var(--surface) 20px); }
+.thumb.soon span { padding: 6px 14px; border-radius: 999px; background: var(--surface); border: 1px dashed var(--muted); color: var(--muted); font-weight: 700; font-size: .85rem; }
+.card.is-soon { opacity: .82; }
+.card.is-soon .tag { background: transparent; border: 1px dashed var(--muted); color: var(--muted); }
+body.page-soon { min-height: 100dvh; background: radial-gradient(1200px 600px at 50% -10%, var(--accent-soft), transparent 60%), var(--bg); }
+.soon-page { display: grid; place-items: start center; padding: 8px 16px 40px; }
+.soon-card { width: min(100%, 560px); padding: 24px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.soon-badge { display: inline-block; margin: 0 0 8px; padding: 3px 12px; border-radius: 999px; border: 1px dashed var(--muted); color: var(--muted); font-weight: 700; font-size: .8rem; }
+.soon-card h2 { margin: 0; font-size: 1.8rem; }
+.soon-designer { margin: 2px 0 12px; color: var(--muted); }
+.soon-card h3 { margin: 18px 0 4px; font-size: 1rem; }
+.soon-card p { margin: 0 0 8px; }
+.soon-note { margin-top: 18px !important; color: var(--muted); font-size: .9rem; }
+.soon-back { display: inline-block; margin-top: 10px; padding: 10px 18px; border-radius: 12px; background: var(--accent); color: var(--accent-ink); text-decoration: none; font-weight: 600; }

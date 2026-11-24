@@ -47,6 +47,9 @@ export function mountGame(def) {
     if (m) m.content = theme() === 'dark' ? '#0f1320' : '#f4f1ea';
   }
 
+  // A move waiting for Confirm: either a previewed square, or one the game itself has assembled.
+  const confirmable = () => (pending !== null ? pending : (def.pendingMove ? def.pendingMove(s, ui) : null));
+
   function banner(res) {
     if (res) return res.text || (res.winner < 0 ? 'Draw!' : `${def.players[res.winner].name} wins!`);
     if (pending !== null) return `${def.players[s.turn].name}: tap Confirm`;
@@ -67,7 +70,7 @@ export function mountGame(def) {
     undoBtn.disabled = hist.length === 0;
     swapBtn.hidden = !(s.swapAvail && !res);
     passBtn.hidden = !(def.canPass && !res);
-    okBtn.hidden = pending === null;
+    okBtn.hidden = !!res || confirmable() === null;
     document.body.classList.toggle('over', !!res);
     document.body.dataset.turn = s.turn;
   }
@@ -119,7 +122,7 @@ export function mountGame(def) {
       else commit(r.move);
     } else if (r.redraw) { pending = null; draw(); }
   });
-  okBtn.addEventListener('click', () => { if (pending !== null) commit(pending); });
+  okBtn.addEventListener('click', () => { const m = confirmable(); if (m !== null) commit(m); });
 
   undoBtn.addEventListener('click', () => {
     if (pending !== null || (def.partial && def.partial(ui))) { pending = null; ui = newUi(); draw(); return; }   // first undo just clears a half-made move

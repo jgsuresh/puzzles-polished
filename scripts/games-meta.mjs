@@ -123,4 +123,72 @@ export const GAMES = [
 <p>Red wants a chain joining the top and bottom edges; Blue wants a chain joining left and right. If the board is nearly full, a single stone is placed or converted instead, which ends the game.</p>
 <p>How to play it here: to drop, tap an empty cell (your stone), then another empty cell (the neutral stone). To convert, tap two neutral stones, then one of your stones.</p>`,
   },
+  {
+    name: 'campaign',
+    title: 'Campaign',
+    description: 'Hop your Knight around leaving a trail of markers: five in a row wins.',
+    objective: 'Line up five of your markers in a row (across, down or diagonally), or leave your opponent\'s Knight with nowhere to go.',
+    rules: `<p>Each player has a single chess Knight. To start, Red drops their Knight on any empty square, then Blue drops theirs.</p>
+<p>After that, on your turn you must jump your Knight like a chess knight (two squares one way, one square at right angles) onto an empty square. The square it leaves is marked with a marker in your colour, and markers block both players forever, so the board slowly fills with trails.</p>
+<p>You win by making a line of five of your own markers, across, down or diagonally. If your Knight has no legal jump on your turn, you lose. The dots show where your Knight can land.</p>
+<p>Note: the original description leaves a few details open; here the Knight itself does not count towards a line (only markers do), and drops can go on any empty square.</p>`,
+  },
+  {
+    name: 'jade',
+    title: 'Jade',
+    description: 'Drop white or black stones. One of you needs a four-sided link, the other a pair of parallel chains.',
+    objective: 'Cross: one group of either colour touching all four edges. Parallel: a white chain and a black chain, each joining the same pair of opposite edges.',
+    rules: `<p>The board is a diamond of hexagons. On your turn you drop <em>one stone on an empty hexagon, and you choose whether it is white or black</em>, whichever suits you. Stones never move. Cross goes first.</p>
+<ul><li><strong>Cross</strong> wins when a single connected group, of either colour, touches all four edges of the board.</li>
+<li><strong>Parallel</strong> wins when a white chain and a black chain both join the same pair of opposite edges (both top-to-bottom, or both left-to-right).</li></ul>
+<p>Either player's stones can complete either goal. If a move completes both, the player who moved wins. If the board fills up with no winner, it is a draw.</p>
+<p>How to play it here: tap a square to preview a white stone, tap the same square again to switch it to black, then press Confirm.</p>`,
+  },
+];
+
+// Games from the book's two-player list that are not playable yet: the author's rules page either gives no
+// rules text, or leaves out the starting position / board, which is only shown in an image.
+export const SOON = [
+  { name: 'aboyne', title: 'Aboyne', designer: 'Paul Sijben, 1995',
+    known: 'A 5 × 5 hexagonal-board game. Each turn you step a stone to an adjacent empty cell, or jump over a line of your own stones. A stone next to an enemy stone is blocked. You win by reaching your goal cell or by leaving your opponent with no move.',
+    missing: 'The starting position and the goal-cell locations are only shown in a diagram.' },
+  { name: 'anchor', title: 'Anchor', designer: 'Steven Meyers, 2000',
+    known: 'An 8 × 8 hexagonal-board territory game where stones that are not part of an "anchor" (a group touching three or more sides) die at the end. Players drop stones or pass, and the pie rule decides sides.',
+    missing: 'Which corners count as "home" and "away", and the exact meaning of the symmetric-play rule.' },
+  { name: 'annuvin', title: 'Annuvin', designer: 'Jeff Roy, 2001',
+    known: 'A capture game on a 4 × 4 hexagonal board where each side has six stones. A stone can move as many spaces as 7 minus the number of stones you have left, so the last stone moves farthest. You win by capturing everything.',
+    missing: 'The starting setup is only shown in a diagram.' },
+  { name: 'dispatch', title: 'Dispatch', designer: 'João Pedro Neto, 2002',
+    known: 'A 13 × 13 territory game: you send a stone in a straight line from one of yours, and where it stops it grows a domino, tromino, tetromino or pentomino. Groups without liberties are captured.',
+    missing: 'The starting position and exactly how the new shape is attached to the stone that stopped.' },
+  { name: 'stooges', title: '3 Stooges', designer: 'Jorge Nuno Silva, 2003',
+    known: 'A "towers" game where you swap the colour of lone stones or move the top stone of a two-stone stack onto a neighbouring lone stone. You win with three stacks in a row, or by stalemating your opponent.',
+    missing: 'The board and the starting stacks are only shown in an image.' },
+  { name: 'gogol', title: 'Gogol', designer: 'Gustav Levay, 2002',
+    known: 'An 8 × 8 game with pawns that can jump to any empty square and a King that slides like a chess queen. Pieces capture by jumping over an adjacent enemy. Capture the enemy King, or reach the far row with yours.',
+    missing: 'The starting arrangement: the sources we found disagree on where the Kings start.' },
+  { name: 'hobbes', title: 'Hobbes', designer: 'Dan Troyka, 2002',
+    known: 'A 5 × 5 game inspired by Neutron. Each turn you walk your King one or more steps, then you must either capture the enemy King or push or pull an adjacent soldier. Capturing the King wins.',
+    missing: 'The starting position is only shown in a diagram, and a few push/pull edge cases are not spelled out.' },
+  { name: 'intersections', title: 'Intersections', designer: 'João Pedro Neto',
+    known: 'It is on the book\'s list of two-player games.',
+    missing: 'We could not find a written description of the rules, only a printable board.' },
+  { name: 'iqishiqi', title: 'Iqishiqi', designer: 'João Pedro Neto, 2003',
+    known: 'A hexagonal-board game with one shared neutral stone. You drop a stone that joins a group, and the neutral stone then slides away from that group by the group\'s size. Get it onto an edge you own to win.',
+    missing: 'The board size and shape are only shown in an image, and a few counting details are ambiguous.' },
+  { name: 'nosferatu', title: 'Nosferatu', designer: 'Chris Huntoon, 2001',
+    known: 'Twelve Villagers and five Vampires face one powerful Nosferatu on a hexagonal board. Pieces capture by jumping, and the Nosferatu can turn Villagers into Vampires. Capture all the Villagers, or capture the Nosferatu.',
+    missing: 'The board size (the sources we found disagree) and who moves first.' },
+  { name: 'pawns', title: 'Pawns', designer: 'João Pedro Neto',
+    known: 'It is on the book\'s list of two-player games.',
+    missing: 'We could not find a written description of the rules, only a printable board.' },
+  { name: 'sanqi', title: 'SanQi', designer: 'L. Lynn Smith, 2003',
+    known: 'A three-colour hex-board game: you drop a stone of any colour, or replace a stone that is outnumbered by at least two to one by a neighbouring colour. The players aim for different shapes of six.',
+    missing: 'Precise definitions of the winning "circle", "triangle" and "line", and the board size.' },
+  { name: 'trafficlights', title: 'Traffic Lights', designer: '',
+    known: 'It is on the book\'s list of two-player games, probably related to the three-in-a-row game of the same name on a small board.',
+    missing: 'The author\'s page has only a printable board, and other sources describe different versions of the rules.' },
+  { name: 'un', title: 'UN', designer: 'João Pedro Neto, 2003',
+    known: 'Players take turns sliding a single neutral stone any distance in a straight line over empty cells; every cell it passes is used up. The first player who cannot move loses.',
+    missing: 'The board is only shown in an image.' },
 ];

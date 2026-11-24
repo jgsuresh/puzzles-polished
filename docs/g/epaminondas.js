@@ -1,6 +1,6 @@
 // Epaminondas (Robert Abbott): move phalanxes (lines of your stones) along their own line,
 // capture smaller enemy phalanxes, and get more stones onto the enemy back row than they have on yours.
-import { h } from './core.js?v=fdcac117';
+import { h } from './core.js?v=fece9af1';
 
 // Eight directions as [dx, dy]; index i and i^1 are opposites. Row 0 is White's back row (bottom).
 const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];

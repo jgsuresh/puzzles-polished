@@ -1,5 +1,5 @@
 // Capture rules and drawing shared by Go and Gonnect.
-import { h } from './core.js?v=fdcac117';
+import { h } from './core.js?v=fece9af1';
 
 const nbCache = new Map();
 export function nbrs(n) {

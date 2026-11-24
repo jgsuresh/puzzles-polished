@@ -22,7 +22,7 @@ if (!executablePath) throw new Error('Chrome not found; set CHROME_PATH');
 
 const gamesOnly = process.argv.includes('--games');   // only (re)make the two-player thumbnails
 const names = gamesOnly ? [] : readdirSync(join(root, 'docs', 'p')).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5));
-const gameNames = readdirSync(join(root, 'docs', 'g')).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5));
+const gameNames = readdirSync(join(root, 'docs', 'g')).filter((f) => f.endsWith('.html') && existsSync(join(root, 'docs', 'g', f.replace('.html', '.js')))).map((f) => f.slice(0, -5));
 const server = await serve(8099);
 const browser = await puppeteer.launch({ executablePath, headless: true });
 try {

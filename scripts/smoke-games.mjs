@@ -12,7 +12,7 @@ const executablePath = [process.env.CHROME_PATH, '/Applications/Google Chrome.ap
   .filter(Boolean).find((p) => existsSync(p));
 if (!executablePath) throw new Error('Chrome not found; set CHROME_PATH');
 
-const names = readdirSync(join(root, 'docs', 'g')).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5));
+const names = readdirSync(join(root, 'docs', 'g')).filter((f) => f.endsWith('.html') && existsSync(join(root, 'docs', 'g', f.replace('.html', '.js')))).map((f) => f.slice(0, -5));
 const only = process.argv.slice(2);
 const server = await serve(8096);
 const browser = await puppeteer.launch({ executablePath, headless: true });

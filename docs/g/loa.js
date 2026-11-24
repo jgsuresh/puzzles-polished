@@ -1,5 +1,5 @@
 // Lines of Action: slide pieces by the number of pieces on their line; join all of yours into one group.
-import { h } from './core.js?v=fdcac117';
+import { h } from './core.js?v=fece9af1';
 
 const N = 8;
 const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
