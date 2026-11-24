@@ -358,6 +358,217 @@
     };
   })();
 
+
+  /* =====================================================================
+     FLOOD
+     ===================================================================== */
+  (function () {
+    var C = { BACKGROUND: 0, SEPARATOR: 1, HIGHLIGHT: 12, LOWLIGHT: 13 };
+    // red, yellow, green, blue, orange, purple, brown, sky, pink, slate (upstream order)
+    var CANDY = ['#ef5b5b', '#f6c141', '#3dbb7e', '#4c8df6', '#f4893a', '#9a6bdf', '#a8754f', '#59c7ea', '#ee7fb6', '#8a93a8'];
+
+    SKINS.flood = {
+      palette: function (i, c) {
+        if (i >= 2 && i <= 11) return CANDY[i - 2];
+        if (i === C.SEPARATOR) return mix(colours[0] || c, '#ffffff', 0.72);
+        return c;
+      },
+      // The recessed 3D frame around the board: not needed.
+      poly: function (pts, fill, outline) { return fill === C.HIGHLIGHT || fill === C.LOWLIGHT; },
+      // Tiles get a soft top-to-bottom sheen.
+      rect: function (x, y, w, h, colour) {
+        if (colour < 2 || colour > 11 || w !== h || w < 6) return false;
+        var g = ctx.createLinearGradient(0, y, 0, y + h);
+        g.addColorStop(0, lighten(colours[colour], 0.16));
+        g.addColorStop(1, darken(colours[colour], 0.05));
+        ctx.fillStyle = g;
+        ctx.fillRect(x, y, w, h);
+        return true;
+      },
+    };
+  })();
+
+  /* =====================================================================
+     FIFTEEN
+     ===================================================================== */
+  (function () {
+    var C = { BACKGROUND: 0, TEXT: 1, HIGHLIGHT: 2, LOWLIGHT: 3 };
+    var pend = null; // outer origin of the tile whose bevel we just swallowed
+
+    SKINS.fifteen = {
+      palette: function (i, c) {
+        if (i === C.TEXT) return '#1f2640';
+        if (i === C.HIGHLIGHT) return '#ffffff';
+        if (i === C.LOWLIGHT) return mix(colours[0] || c, '#8f8bf0', 0.35);
+        return c;
+      },
+      poly: function (pts, fill, outline) {
+        if (fill !== outline || (fill !== C.HIGHLIGHT && fill !== C.LOWLIGHT)) return false;
+        if (pts.length === 10) return true;                    // recessed frame around the board
+        if (pts.length === 6) {                                // bevel triangles of a tile
+          if (fill === C.LOWLIGHT) pend = { x: pts[4], y: pts[3] };
+          return true;
+        }
+        return false;
+      },
+      rect: function (x, y, w, h, colour) {
+        if (w !== h || w < 8) return false;
+        if (pend) {                                            // the face of a tile
+          var ox = pend.x, oy = pend.y, size = w + 2 * (x - ox);
+          pend = null;
+          ctx.fillStyle = colours[C.BACKGROUND];
+          ctx.fillRect(ox, oy, size + 1, size + 1);
+          var gap = Math.max(1.5, size * 0.04), r = size * 0.2;
+          var face;
+          if (colour === C.BACKGROUND) {
+            face = ctx.createLinearGradient(0, oy, 0, oy + size);
+            face.addColorStop(0, '#ffffff');
+            face.addColorStop(1, mix(colours[C.BACKGROUND], '#9d97d6', 0.3));
+          } else face = colours[colour];
+          ctx.save();
+          ctx.shadowColor = 'rgba(60, 50, 90, 0.28)';
+          ctx.shadowBlur = size * 0.07;
+          ctx.shadowOffsetY = size * 0.03;
+          rrect(ox + gap, oy + gap, size - 2 * gap - 1, size - 2 * gap - 1, r);
+          ctx.fillStyle = face;
+          ctx.fill();
+          ctx.restore();
+          return true;
+        }
+        if (colour === C.BACKGROUND && w < (onscreen_canvas.width / fe_scale) * 0.5) { // the empty slot: a faint recess
+          ctx.fillStyle = colours[C.BACKGROUND];
+          ctx.fillRect(x, y, w, h);
+          var inset = Math.max(1.5, w * 0.04);
+          rrect(x + inset, y + inset, w - 2 * inset, h - 2 * inset, w * 0.2);
+          ctx.fillStyle = darken(colours[C.BACKGROUND], 0.05);
+          ctx.fill();
+          return true;
+        }
+        return false;
+      },
+      text: function (x, y, halign, colour, size, mono, txt) {
+        if (colour !== C.TEXT) return false;
+        drawText(x, y, halign, colours[colour], size, 800, txt);
+        return true;
+      },
+    };
+  })();
+
+  /* =====================================================================
+     LIGHTS UP
+     ===================================================================== */
+  (function () {
+    var C = { BACKGROUND: 0, GRID: 1, BLACK: 2, LIGHT: 3, LIT: 4, ERROR: 5, CURSOR: 6 };
+    var floorW = 0, blackW = 0;
+
+    SKINS.lightup = {
+      palette: function (i, c) {
+        var bg = colours[0] || c;
+        switch (i) {
+          case C.GRID: return mix(bg, '#6b7394', 0.3);
+          case C.BLACK: return '#2b3252';
+          case C.LIGHT: return '#ffffff';
+          case C.LIT: return '#ffe7a0';
+          case C.ERROR: return '#e5484d';
+          case C.CURSOR: return '#4f46e5';
+          default: return c;
+        }
+      },
+      rect: function (x, y, w, h, colour) {
+        if (colour === C.BACKGROUND || colour === C.LIT || colour === C.GRID) {
+          if (w === h && w > 8) floorW = w;
+          return false;
+        }
+        if (colour !== C.BLACK) return false;
+        var T = Math.max(floorW, blackW);
+        if (w >= 0.6 * T) {                                    // a wall
+          blackW = Math.max(blackW, w);
+          ctx.fillStyle = colours[C.BACKGROUND];
+          ctx.fillRect(x, y, w, h);
+          var inset = Math.max(1, w * 0.045);
+          var g = ctx.createLinearGradient(0, y, 0, y + h);
+          g.addColorStop(0, '#3d4670'); g.addColorStop(1, '#262c4a');
+          rrect(x + inset, y + inset, w - 2 * inset, h - 2 * inset, w * 0.16);
+          ctx.fillStyle = g;
+          ctx.fill();
+        } else {                                               // the "can't be a light" marker
+          ctx.beginPath();
+          ctx.arc(x + w / 2, y + h / 2, w * 0.42, 0, 2 * Math.PI);
+          ctx.fillStyle = mix('#2b3252', colours[C.BACKGROUND], 0.45);
+          ctx.fill();
+        }
+        return true;
+      },
+      circle: function (x, y, r, fill, outline) {
+        if (outline !== C.BLACK || (fill !== C.LIGHT && fill !== C.ERROR)) return false;
+        var bad = fill === C.ERROR, cx = x + 0.5, cy = y + 0.5;
+        ctx.save();
+        if (!bad) { ctx.shadowColor = 'rgba(255, 190, 40, 0.9)'; ctx.shadowBlur = r * 0.9; }
+        var g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.35, r * 0.1, cx, cy, r);
+        if (bad) { g.addColorStop(0, '#ff9aa0'); g.addColorStop(1, '#e5484d'); }
+        else { g.addColorStop(0, '#fffbe8'); g.addColorStop(0.55, '#ffd84d'); g.addColorStop(1, '#f2a900'); }
+        ctx.beginPath(); ctx.arc(cx, cy, r * 0.82, 0, 2 * Math.PI);
+        ctx.fillStyle = g; ctx.fill();
+        ctx.restore();
+        return true;
+      },
+      text: function (x, y, halign, colour, size, mono, txt) {
+        if (colour !== C.LIGHT && colour !== C.ERROR) return false;
+        drawText(x, y, halign, colour === C.ERROR ? '#ff7b82' : '#ffffff', size, 800, txt);
+        return true;
+      },
+    };
+  })();
+
+  /* =====================================================================
+     PATTERN (nonogram)
+     ===================================================================== */
+  (function () {
+    var C = { BACKGROUND: 0, EMPTY: 1, FULL: 2, TEXT: 3, UNKNOWN: 4, GRID: 5, CURSOR: 6, ERROR: 7, CURSOR_GUIDE: 8 };
+
+    SKINS.pattern = {
+      palette: function (i, c) {
+        var bg = colours[0] || c;
+        switch (i) {
+          case C.GRID: return mix(bg, '#6b7394', 0.32);
+          case C.TEXT: return '#1f2640';
+          case C.ERROR: return '#e5484d';
+          case C.CURSOR_GUIDE: return '#4f46e5';
+          case C.CURSOR: return '#4f46e5';
+          case C.UNKNOWN: return mix(bg, '#6b7394', 0.1);
+          case C.EMPTY: return lighten(bg, 0.7);
+          case C.FULL: return '#2c3260';
+          default: return c;
+        }
+      },
+      rect: function (x, y, w, h, colour) {
+        if ((colour !== C.FULL && colour !== C.EMPTY && colour !== C.UNKNOWN) || w < 6 || h < 6) return false;
+        var inset = Math.max(0.5, w * 0.03), r = Math.min(w, h) * 0.24;
+        var fill = colours[colour];
+        if (colour === C.FULL) {
+          var g = ctx.createLinearGradient(0, y, 0, y + h);
+          g.addColorStop(0, '#454d8f'); g.addColorStop(1, '#262b52');
+          fill = g;
+        }
+        rrect(x + inset, y + inset, w - 2 * inset, h - 2 * inset, r);
+        ctx.fillStyle = fill;
+        ctx.fill();
+        if (colour === C.EMPTY) {                              // a marked-empty cell gets a tiny dot
+          ctx.beginPath();
+          ctx.arc(x + w / 2, y + h / 2, Math.max(1, w * 0.07), 0, 2 * Math.PI);
+          ctx.fillStyle = mix(colours[C.BACKGROUND], '#6b7394', 0.45);
+          ctx.fill();
+        }
+        return true;
+      },
+      text: function (x, y, halign, colour, size, mono, txt) {
+        if (colour !== C.TEXT && colour !== C.ERROR && colour !== C.CURSOR_GUIDE) return false;
+        drawText(x, y, halign, colours[colour], size, 700, txt);
+        return true;
+      },
+    };
+  })();
+
   /* ---------- activate ---------- */
   var name = (window.STG || {}).name;
   if (name && SKINS[name] && !/[?&]skin=off\b/.test(location.search)) window.stgSkin = SKINS[name];

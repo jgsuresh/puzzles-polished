@@ -67,6 +67,10 @@ Beyond the palette, individual games can be *re-skinned*. The patched glue offer
 | Net | rounded endpoint boxes, slate wires with a glowing power core |
 | Solo | bold givens vs indigo player entries, faint cell lines with strong box borders, soft rounded selection |
 | Loopy | indigo round-capped loop ribbons, softer dots, bold clues |
+| Flood | curated candy palette, glossy tiles, white region separators instead of the bevelled frame |
+| Fifteen | rounded gradient tiles with soft shadows, recessed empty slot, bold numerals |
+| Light Up | rounded slate walls, glowing bulbs, warm lit corridors, soft "can't be a light" dots |
+| Pattern | rounded cells, indigo filled squares, dotted marked-empty cells, bold clues |
 
 Where the JS layer can't reach (layout constants, margins), `scripts/patch-glue.mjs` also carries small asserted patches to the engines' C source, applied to the pinned upstream commit before compiling.
 
