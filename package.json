@@ -10,7 +10,8 @@
     "site": "node scripts/build-site.mjs",
     "serve": "node scripts/serve.mjs",
     "thumbs": "node scripts/thumbs.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "smoke:touch": "node scripts/smoke-touch.mjs"
   },
   "devDependencies": {
     "puppeteer-core": "^24.0.0"

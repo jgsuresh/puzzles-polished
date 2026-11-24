@@ -30,6 +30,7 @@ npm run build        # fetch upstream @ pinned commit -> patch glue -> compile t
 npm run site         # re-assemble docs/ only (after editing web/ — no recompile)
 npm install && npm run thumbs   # regenerate gallery thumbnails, light + dark (needs Chrome)
 npm run smoke                   # play every puzzle headlessly and fail on any JS error
+npm run smoke:touch             # same on a phone-sized touch viewport, plus layout checks
 ```
 
 > Editing `web/css` or `web/js/home.js`/`puzzle-ui.js`/templates only needs `npm run site`.
@@ -73,7 +74,7 @@ Dark mode is a real second palette, not a filter. The canvas gets a dark backgro
 
 ### Tests
 
-`npm run smoke` loads every puzzle in headless Chrome, clicks and types at it, flips the theme live, starts a new game, and fails on any JS error.
+`npm run smoke` loads every puzzle in headless Chrome, clicks and types at it, flips the theme live, starts a new game, and fails on any JS error. `npm run smoke:touch` does it on an emulated phone (taps, drags, no overflow, board clear of the dock).
 
 ## Adding or tweaking a puzzle's touch controls
 
