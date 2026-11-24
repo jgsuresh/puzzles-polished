@@ -62,4 +62,65 @@ export const GAMES = [
 <p>Tap a queen, then a highlighted square to move it, then a highlighted square for the arrow. Tap the queen's new square to take the move back. The first player who cannot move loses.</p>
 <p>Tip: it is a territory game. Use arrows to wall off a big region for your own queens.</p>`,
   },
+  {
+    name: 'go',
+    title: 'Go',
+    description: 'Surround more of the board than your opponent. Simple rules, endless depth.',
+    objective: 'Control more points than your opponent: your stones plus the empty areas only you surround. White gets komi to offset moving second.',
+    rules: `<p>Players take turns placing a stone on an empty intersection (Black first), or passing. Stones never move once placed.</p>
+<p><strong>Capture.</strong> A group of connected stones is captured and removed when it has no empty point next to it (no "liberties"). You may not play a move that leaves your own group with no liberties unless it captures, and you may not recreate a whole-board position that has occurred before (the ko rule).</p>
+<p><strong>Ending.</strong> The game ends when both players pass in a row. Each side scores its stones plus every empty region touched only by its stones. White also receives komi (a few extra points). Highest score wins. This game does not mark dead stones for you, so capture anything you think is dead before you pass.</p>
+<p>Tip: stones near the edge are weak; the corners are the best place to start.</p>`,
+  },
+  {
+    name: 'gonnect',
+    title: 'Gonnect',
+    description: 'Go with captures, but no passing: win by linking two opposite sides.',
+    objective: 'Make one chain of your stones that connects two opposite sides of the board (left to right, or top to bottom).',
+    rules: `<p>Gonnect uses the rules of Go: place a stone on an empty point, groups with no liberties are captured, suicide is illegal and so is repeating an earlier position. Two things change: <strong>nobody may pass</strong>, and the goal is not territory.</p>
+<p>You win by building a chain of connected stones that touches two opposite sides of the board (either pair). You also win if your opponent has no legal move. There are no draws.</p>
+<p><strong>Pie rule.</strong> After Black's first move, White may press <em>Swap</em> to take that stone as their own (switching sides) instead of playing.</p>
+<p>Tip: a chain that cannot be captured is worth more than a long one.</p>`,
+  },
+  {
+    name: 'loa',
+    title: 'Lines of Action',
+    description: 'Slide your pieces together into one connected group.',
+    objective: 'Connect all of your pieces into a single group (touching sides or corners).',
+    rules: `<p>Black holds the top and bottom rows, White the left and right columns, and Black moves first.</p>
+<p>On your turn, move one piece in a straight line (across, down or diagonally) by exactly as many squares as there are pieces, of either colour, anywhere on that whole line. You may jump over your own pieces but not over enemy pieces. You may land on an empty square or on an enemy piece, which is captured and removed; you may not land on your own piece.</p>
+<p>You win when all your pieces form one connected group (squares touching by side or corner). If a move connects both sides at once, the player who moved wins.</p>`,
+  },
+  {
+    name: 'slimetrail',
+    title: 'Slimetrail',
+    description: 'Push one shared token toward your goal corner; every cell it leaves is blocked.',
+    objective: 'The token is shared. Win by getting it into your own goal corner, or lose it to your opponent\'s.',
+    rules: `<p>One token starts in the middle of a diamond of hexagons. The two obtuse corners are goals: the Red goal is the top-right corner and the Blue goal is the bottom-left corner.</p>
+<p>On your turn, move the token to a neighbouring cell that hasn't been used. The cell it leaves is blocked for good, leaving a slime trail. You are not allowed to make a move after which no goal could ever be reached.</p>
+<p>The player whose goal the token enters wins, <em>whoever moved it there</em>. If the token gets stuck anywhere else, the game is a draw. The dots show where you may move.</p>`,
+  },
+  {
+    name: 'epaminondas',
+    title: 'Epaminondas',
+    description: 'Advance phalanxes of stones, capture smaller ones, and break through to the far row.',
+    objective: 'At the start of your turn, have more stones on the enemy back row than they have on yours.',
+    rules: `<p>Each side starts with two full rows of stones. A <strong>phalanx</strong> is a straight, unbroken line of your stones (across, down or diagonally); a single stone is a phalanx of one.</p>
+<p><strong>Moving.</strong> A phalanx moves forwards or backwards <em>along its own line</em>, never sideways, up to as many squares as it has stones. You may also move just part of a phalanx (a shorter unbroken run), and then the limit is the number of stones you move. A single stone can step one square in any of the eight directions. Stones cannot jump over anything.</p>
+<p><strong>Capturing.</strong> If a moving phalanx runs into an enemy phalanx that is <em>smaller</em> than itself, along the direction of travel, it captures that whole enemy line and lands on its first square. Larger or equal lines block you.</p>
+<p><strong>Winning.</strong> The tinted rows are the goals. If, when your turn begins, you have more stones on your opponent's back row than they have on yours, you win.</p>
+<p>How to play it here: tap a stone to select it, or tap two stones to select the run between them. The dots show where it can land (rings mean a capture), tap one to move. The 10 × 8 board is a smaller variant we added for phones.</p>`,
+  },
+  {
+    name: 'nex',
+    title: 'Nex',
+    description: 'Hex with shared neutral stones that either player can turn to their side.',
+    objective: 'Red joins the top and bottom edges; Blue joins the left and right edges, with an unbroken chain of their own stones.',
+    rules: `<p>Nex is played on a Hex board with a pool of <strong>neutral</strong> stones that belong to neither player. On your turn you do <em>one</em> of these:</p>
+<ul><li><strong>Drop two stones:</strong> place one stone of your colour and one neutral stone, on two empty hexagons.</li>
+<li><strong>Convert:</strong> turn two neutral stones into your colour, and turn one of your own stones into a neutral stone.</li></ul>
+<p>Either way you end up with exactly one more stone of your colour, so both players always have the same number after each full round. Neutral stones don't count for anyone's chain.</p>
+<p>Red wants a chain joining the top and bottom edges; Blue wants a chain joining left and right. If the board is nearly full, a single stone is placed or converted instead, which ends the game.</p>
+<p>How to play it here: to drop, tap an empty cell (your stone), then another empty cell (the neutral stone). To convert, tap two neutral stones, then one of your stones.</p>`,
+  },
 ];

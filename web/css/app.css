@@ -674,3 +674,25 @@ dialog.sheet .shortcuts { color: var(--muted); font-size: .9rem; }
 .sheet-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 .sheet-actions button { padding: 10px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); font-weight: 600; }
 .sheet-actions .go { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+
+/* Second batch of games */
+.goalrow { opacity: .28; pointer-events: none; }
+.goalrow.p0 { fill: var(--p0); }
+.goalrow.p1 { fill: var(--p1); }
+.qhint.cap { fill: none; stroke: #e0457b; stroke-width: .09; opacity: .9; }
+.stone.landed { stroke: var(--accent); stroke-width: .08; }
+.stone.neutral { fill: #9aa3bd; stroke: rgba(0, 0, 0, .3); stroke-width: .05; }
+.sel-ring { fill: none; stroke: var(--accent); stroke-width: .12; pointer-events: none; }
+.terr { opacity: .75; pointer-events: none; }
+.terr.gs0 { fill: #1b1f2a; }
+.terr.gs1 { fill: #f6f3ea; stroke: rgba(0, 0, 0, .3); stroke-width: .03; }
+.hexcell.slimed { fill: color-mix(in srgb, #6fbf73 55%, var(--surface-2)); }
+:root[data-theme="dark"] .hexcell.slimed { fill: color-mix(in srgb, #4fa86b 45%, var(--surface-2)); }
+.hexcell.goal.p0 { fill: color-mix(in srgb, var(--p0) 35%, var(--surface-2)); }
+.hexcell.goal.p1 { fill: color-mix(in srgb, var(--p1) 35%, var(--surface-2)); }
+.goal-ring { fill: none; stroke-width: .12; pointer-events: none; }
+.goal-ring.p0 { stroke: var(--p0); }
+.goal-ring.p1 { stroke: var(--p1); }
+.slime-token { fill: #6fd36f; stroke: #2e8a3e; stroke-width: .08; filter: drop-shadow(0 .06px .08px rgba(0,0,0,.35)); }
+.slime-shine { fill: rgba(255, 255, 255, .55); }
+.token { transition: transform .2s; }

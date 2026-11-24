@@ -22,7 +22,7 @@ export function h(tag, attrs, parent) {
 export function mountGame(def) {
   const $ = (s) => document.querySelector(s);
   const svg = $('#boardsvg'), statusEl = $('#statusbar');
-  const undoBtn = $('#undo'), swapBtn = $('#swap'), okBtn = $('#confirm');
+  const undoBtn = $('#undo'), swapBtn = $('#swap'), okBtn = $('#confirm'), passBtn = $('#pass');
   const KEY = 'stg-g-' + def.name;
   let saved = {};
   try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
@@ -48,7 +48,7 @@ export function mountGame(def) {
   }
 
   function banner(res) {
-    if (res) return res.winner < 0 ? 'Draw!' : `${def.players[res.winner].name} wins!`;
+    if (res) return res.text || (res.winner < 0 ? 'Draw!' : `${def.players[res.winner].name} wins!`);
     if (pending !== null) return `${def.players[s.turn].name}: tap Confirm`;
     const extra = def.status ? def.status(s, ui) : '';
     return extra || `${def.players[s.turn].name} to move`;
@@ -66,6 +66,7 @@ export function mountGame(def) {
     if (s.note && !res) statusEl.title = s.note;
     undoBtn.disabled = hist.length === 0;
     swapBtn.hidden = !(s.swapAvail && !res);
+    passBtn.hidden = !(def.canPass && !res);
     okBtn.hidden = pending === null;
     document.body.classList.toggle('over', !!res);
     document.body.dataset.turn = s.turn;
@@ -128,6 +129,7 @@ export function mountGame(def) {
     draw();
   });
   swapBtn.addEventListener('click', () => commit('swap'));
+  passBtn.addEventListener('click', () => commit('pass'));
 
   // ----- dialogs -----
   const dlg = $('#newgame'), form = $('#newgame-form');

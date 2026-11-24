@@ -36,10 +36,12 @@ try {
           const g = window.stgGame, s = g.state;
           if (g.def.result(s)) return null;
           const ms = g.def.moves(s).filter((x) => x !== 'swap' && x !== 'pass');
-          return ms.length ? ms[Math.floor(Math.random() * ms.length)] : null;
+          if (!ms.length) return null;
+          const m = ms[Math.floor(Math.random() * ms.length)];
+          return { taps: g.def.tapSequence ? g.def.tapSequence(s, m) : Array.isArray(m) ? m : [m] };
         });
         if (m === null) break;
-        for (const c of Array.isArray(m) ? m : [m]) await (await page.$(`#boardsvg [data-c="${c}"]`)).tap();
+        for (const c of m.taps) await (await page.$(`#boardsvg [data-c="${c}"]`)).tap();
         if (!(await page.$eval('#confirm', (e) => e.hidden))) await page.tap('#confirm');
         played++;
       }

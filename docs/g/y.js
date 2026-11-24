@@ -1,6 +1,6 @@
 // Y: a triangular Hex board. Whoever links all three sides with one chain wins.
 // No draws are possible, and the board is symmetric, so the swap rule just recolours.
-import { h } from './core.js?v=1a852cc1';
+import { h } from './core.js?v=fdcac117';
 import { hexXY, hexVerts, pts, boundsOf } from './hexgeom.js?v=0ac8f1ce';
 
 const cache = new Map();

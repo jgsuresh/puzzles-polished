@@ -15,7 +15,7 @@
     document.documentElement.dataset.theme = t;
   })();
 </script>
-<link rel="stylesheet" href="../css/app.css?v=10085d32">
+<link rel="stylesheet" href="../css/app.css?v=5d75fde2">
 </head>
 <body class="page-puzzle page-game">
 
@@ -64,6 +64,8 @@
         <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg><span>Undo</span></button></li>
       <li><button type="button" id="swap" hidden>
         <svg viewBox="0 0 24 24"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg><span>Swap</span></button></li>
+      <li><button type="button" id="pass" hidden>
+        <svg viewBox="0 0 24 24"><path d="M5 4v16"/><path d="M5 5h11l-2 4 2 4H5"/></svg><span>Pass</span></button></li>
       <li><button type="button" id="confirm" class="primary" hidden>
         <svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>Confirm</span></button></li>
       <li><button type="button" id="new" aria-label="New game">
@@ -105,7 +107,7 @@
 
 <script type="module">
   import def from './gomoku.js?v=64fc9096';
-  import { mountGame } from './core.js?v=1a852cc1';
+  import { mountGame } from './core.js?v=fdcac117';
   mountGame(def);
 </script>
 </body>

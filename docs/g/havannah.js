@@ -1,5 +1,5 @@
 // Havannah: win with a ring, a bridge (two corners) or a fork (three sides).
-import { h } from './core.js?v=1a852cc1';
+import { h } from './core.js?v=fdcac117';
 import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=0ac8f1ce';
 
 const cache = new Map();

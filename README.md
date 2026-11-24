@@ -82,7 +82,7 @@ Dark mode is a real second palette, not a filter. The canvas gets a dark backgro
 
 ## Two-player games
 
-A second section for **pass-and-play** board games, meant for handing one phone back and forth: Hex, Y, Havannah, Gomoku, Reversi and Amazons. These are plain ES modules in `web/games/` (no WebAssembly): `core.js` is the shared shell (turn banner coloured for whoever is up, **tap to preview then Confirm** so a stray touch can't commit a move, undo, options dialog, rules sheet) and each game is a small pure-logic object plus a renderer. Rules text is in `scripts/games-meta.mjs`, written in our own words. There is no computer opponent yet.
+A second section for **pass-and-play** board games, meant for handing one phone back and forth: Hex, Y, Havannah, Gomoku, Reversi, Amazons, Go, Gonnect, Lines of Action, Slimetrail, Epaminondas and Nex. These are plain ES modules in `web/games/` (no WebAssembly): `core.js` is the shared shell (turn banner coloured for whoever is up, **tap to preview then Confirm** so a stray touch can't commit a move, undo, options dialog, rules sheet) and each game is a small pure-logic object plus a renderer. Rules text is in `scripts/games-meta.mjs`, written in our own words. Rules come from the author's own descriptions where available (Slimetrail, Epaminondas, Gonnect, Nex, Lines of Action) and standard rules otherwise. There is no computer opponent yet.
 
 To add a game: write `web/games/<name>.js` exporting the object described at the top of `core.js`, add it to `scripts/games-meta.mjs`, then `npm run site`, `node scripts/thumbs.mjs --games`, `npm run test:games` and `npm run smoke:games`.
 

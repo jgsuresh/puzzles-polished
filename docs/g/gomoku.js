@@ -1,5 +1,5 @@
 // Gomoku: first to get five (or more) in a row, horizontally, vertically or diagonally.
-import { h } from './core.js?v=1a852cc1';
+import { h } from './core.js?v=fdcac117';
 
 const D4 = [[1, 0], [0, 1], [1, 1], [1, -1]];
 

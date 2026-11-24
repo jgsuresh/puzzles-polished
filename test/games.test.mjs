@@ -7,8 +7,15 @@ import havannah, { winKind } from '../web/games/havannah.js';
 import gomoku from '../web/games/gomoku.js';
 import reversi from '../web/games/reversi.js';
 import amazons from '../web/games/amazons.js';
+import go from '../web/games/go.js';
+import gonnect from '../web/games/gonnect.js';
+import loa from '../web/games/loa.js';
+import slimetrail from '../web/games/slimetrail.js';
+import epaminondas, { genMoves, landing } from '../web/games/epaminondas.js';
+import nex from '../web/games/nex.js';
+import { place } from '../web/games/goengine.js';
 
-const ALL = { hex, y, havannah, gomoku, reversi, amazons };
+const ALL = { hex, y, havannah, gomoku, reversi, amazons, go, gonnect, loa, slimetrail, nex, epaminondas };
 const play = (def, s, ...moves) => moves.reduce((st, m) => def.apply(st, m), s);
 
 test('every game finishes from random play and never offers an illegal state', () => {
@@ -156,4 +163,136 @@ test('amazons: opening move count, a full move, and being trapped loses', () => 
   b[99] = 1;
   assert.equal(amazons.result({ b, turn: 1, last: null }).winner, 0);
   assert.equal(amazons.result({ b, turn: 0, last: null }), null);
+});
+
+test('go: captures, suicide, ko and area scoring', () => {
+  const n = 5, B = (list, v) => { const b = new Uint8Array(n * n); for (const [x, y, c] of list) b[y * n + x] = c; return b; };
+  // A white stone at (1,1) surrounded on three sides is captured by black at the fourth.
+  let b = B([[1, 1, 2], [0, 1, 1], [2, 1, 1], [1, 0, 1]], 0);
+  const r = place(b, n, 1 * n + 1 + n, 1);
+  assert.equal(r.caps, 1);
+  assert.equal(r.b[1 * n + 1], 0);
+  // Suicide: a black stone in a white-surrounded eye is illegal.
+  b = B([[1, 0, 2], [0, 1, 2], [2, 1, 2], [1, 2, 2]], 0);
+  assert.equal(place(b, n, 1 * n + 1, 1), null);
+  // ...but fine for White, who would just fill own eye.
+  assert.ok(place(b, n, 1 * n + 1, 2));
+  // Ko: after Black captures at (2,1), White may not immediately retake at (1,1).
+  const ko = go.init({ n: 5, komi: 0.5 });
+  const kb = B([[1, 1, 2], [2, 0, 2], [2, 2, 2], [3, 1, 2], [0, 1, 1], [1, 0, 1], [1, 2, 1]]);
+  let st = { ...ko, b: kb, hist: [Array.prototype.join.call(kb, '')], turn: 0 };
+  assert.ok(go.moves(st).includes(1 * n + 2));
+  st = go.apply(st, 1 * n + 2);
+  assert.equal(st.b[1 * n + 1], 0);                      // the white stone was captured
+  assert.ok(!go.moves(st).includes(1 * n + 1));          // ko: White cannot retake at once
+  assert.ok(go.moves(st).includes('pass'));
+});
+
+test('go: two passes end the game and score by area with komi', () => {
+  let s = go.init({ n: 5, komi: 0.5 });
+  s = go.apply(s, 12);              // black centre
+  s = go.apply(s, 'pass');
+  s = go.apply(s, 'pass');
+  const r = go.result(s);
+  assert.equal(r.winner, 0);        // black owns the whole board
+  assert.match(r.text, /Black wins by 24\.5/);
+});
+
+test('gonnect: connection across wins, pie rule swaps', () => {
+  let s = gonnect.init({ n: 9, swap: 1 });
+  s = gonnect.apply(s, 40);
+  assert.ok(s.swapAvail && gonnect.moves(s).includes('swap'));
+  s = gonnect.apply(s, 'swap');
+  assert.equal(s.b[40], 2);
+  assert.equal(s.turn, 0);
+  // Black builds a column on x=0 while White plays elsewhere far away.
+  let t = gonnect.init({ n: 9, swap: 0 });
+  for (let y = 0; y < 9; y++) {
+    t = gonnect.apply(t, y * 9);                       // black down the first column
+    if (y < 8) t = gonnect.apply(t, y * 9 + 4);        // white mid column
+  }
+  assert.equal(gonnect.result(t)?.winner, 0);
+});
+
+test('loa: opening moves, line-count distance, connection wins', () => {
+  const s = loa.init();
+  assert.equal(s.b.filter((v) => v === 1).length, 12);
+  assert.equal(s.b.filter((v) => v === 2).length, 12);
+  // A black piece on the bottom row (row 0) with 2 pieces on its column moves 2 squares up.
+  const from = 3;                                       // d1
+  const targets = loa.moves(s).filter((m) => m[0] === from).map((m) => m[1]);
+  assert.ok(targets.includes(3 + 2 * 8));
+  // Simultaneous connection: the player who moves wins. Black joins (0,0)+(1,0); White's lone piece is connected too.
+  const b = new Uint8Array(64); b[0] = 1; b[3] = 1; b[63] = 2;
+  const st = { b, turn: 0, last: null, won: -1 };
+  assert.ok(loa.moves(st).some((m) => m[0] === 3 && m[1] === 1));
+  assert.equal(loa.result(loa.apply(st, [3, 1])).winner, 0);
+  // Jumping: can't pass over an enemy but can pass over a friend.
+  const c = new Uint8Array(64); c[0] = 1; c[1] = 1; c[2] = 2; c[63] = 2;
+  const sc = { b: c, turn: 0, last: null, won: -1 };
+  // Row 0 holds 3 pieces, so (0,0) must travel 3: that crosses the enemy on (2,0) and is illegal.
+  assert.ok(!loa.moves(sc).some((m) => m[0] === 0 && m[1] === 3));
+  // (1,0) travels 3 as well, jumping its friend... to (4,0) it must pass the enemy at (2,0): also illegal.
+  assert.ok(!loa.moves(sc).some((m) => m[0] === 1 && m[1] === 4));
+});
+
+test('slimetrail: moves block cells, goals decide the winner, trapping moves are illegal', () => {
+  let s = slimetrail.init({ n: 7 });
+  const first = slimetrail.moves(s);
+  assert.ok(first.length >= 4);
+  s = slimetrail.apply(s, first[0]);
+  assert.equal(s.blocked[3 * 7 + 3], 1);
+  assert.ok(!slimetrail.moves(s).includes(3 * 7 + 3));
+  // Walk until somebody wins or it ends; the result is consistent.
+  let guard = 0;
+  while (!slimetrail.result(s)) { const m = slimetrail.moves(s); s = slimetrail.apply(s, m[Math.floor(Math.random() * m.length)]); assert.ok(++guard < 100); }
+  const r = slimetrail.result(s);
+  assert.ok([-1, 0, 1].includes(r.winner));
+});
+
+test('epaminondas: setup, phalanx limits and captures', () => {
+  const s = epaminondas.init({ size: 'small' });
+  const [W, H] = s.dims;
+  assert.equal(s.b.filter((v) => v === 1).length, 2 * W);
+  const ms = genMoves(s, 1);
+  assert.ok(ms.length > 0);
+  // Every generated move lands on an empty square or a capturable enemy, never off board.
+  for (const m of ms) { const l = landing(s, m); assert.ok(l >= 0 && l < W * H); assert.notEqual(s.b[l], 1); }
+  // Capture: a 2-stone phalanx beats a single enemy stone but a single stone cannot capture.
+  const b = new Uint8Array(W * H);
+  b[0] = 1; b[1] = 1; b[3] = 2;                 // row 0: W W . B
+  let st = { dims: [W, H], b, turn: 0, last: null };
+  const cap = genMoves(st, 1).filter((m) => landing(st, m) === 3);
+  assert.equal(cap.length, 1);
+  const after = epaminondas.apply(st, cap[0]);
+  assert.equal(after.b[3], 1);
+  assert.equal(after.b[2], 1);
+  assert.equal(after.b.filter((v) => v === 2).length, 0);
+  const single = new Uint8Array(W * H); single[0] = 1; single[1] = 2;
+  assert.equal(genMoves({ dims: [W, H], b: single, turn: 0 }, 1).filter((m) => landing({ dims: [W, H] }, m) === 1).length, 0);
+  // Win test: White has stones on Black's back row at the start of White's turn.
+  const w = new Uint8Array(W * H); w[(H - 1) * W] = 1; w[W + 5] = 2; w[W + 6] = 2;
+  assert.equal(epaminondas.result({ dims: [W, H], b: w, turn: 0, last: null })?.winner, 0);
+});
+
+test('nex: both move types, endgame single moves, win detection', () => {
+  let s = nex.init({ n: 7 });
+  assert.ok(nex.moves(s).some((m) => m.length === 2));
+  s = nex.apply(s, [0, 1]);                       // red at 0, neutral at 1
+  assert.equal(s.b[0], 1);
+  assert.equal(s.b[1], 3);
+  s = nex.apply(s, [10, 11]);                     // blue + neutral
+  // Red can convert the two neutrals into red and one red stone into neutral.
+  const conv = nex.moves(s).filter((m) => m.length === 3);
+  assert.ok(conv.length > 0);
+  const t = nex.apply(s, conv[0]);
+  assert.equal(t.b.filter((v) => v === 3).length, 1);
+  assert.equal(t.b.filter((v) => v === 1).length, 2);
+  // Red column at x=0 wins (top to bottom).
+  let w = nex.init({ n: 5 });
+  for (let r = 0; r < 5; r++) {
+    w = nex.apply(w, [r * 5, r * 5 + 2]);           // red on column 0, neutral on column 2
+    if (r < 4) w = nex.apply(w, [r * 5 + 4, r * 5 + 3]);
+  }
+  assert.equal(nex.result(w)?.winner, 0);
 });
