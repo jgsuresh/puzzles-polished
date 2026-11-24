@@ -59,6 +59,13 @@ patch('emccpre.js', [
     to: 'var thisitem = target.closest("li");\n        if (thisitem === null) return;\n        var thismenu = thisitem.closest("ul");',
   },
   {
+    // KaiOS workaround upstream: every link in the form is turned into window.open(),
+    // which made our "back to all puzzles" link open a popup (or "[object SVGAnimatedString]").
+    name: 'links navigate normally',
+    from: 'for (var elem of document.querySelectorAll("#gamemenu a[href]")) {',
+    to: 'for (var elem of []) {',
+  },
+  {
     name: 'no alert() on error',
     from: 'alert(e.message);',
     to: 'if (window.stgError) window.stgError(e.message); else console.error(e.message);',
