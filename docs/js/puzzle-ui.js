@@ -197,7 +197,7 @@
       tip.hidden = false;
       place(x, y);
     }
-    function hide() { clearTimeout(timer); tip.hidden = true; }
+    function hide() { clearTimeout(timer); armedFor = null; tip.hidden = true; }
 
     function sync() {
       if (btn) btn.setAttribute('aria-pressed', String(on));
@@ -213,13 +213,19 @@
       sync();
     });
 
-    document.addEventListener('pointerover', function (e) {
-      if (!on || e.pointerType !== 'mouse') return;
+    // Armed from pointerover *and* pointermove: pointerover alone misses a pointer that
+    // is already resting on the board when the page loads, or after a press hid the tip.
+    var armedFor = null;
+    function arm(e) {
+      if (!on || e.pointerType !== 'mouse' || pressed) return;
       var el = e.target.closest && e.target.closest('[data-hint], #puzzlecanvas');
-      if (!el || (el.matches('#puzzlecanvas') ? !CFG.hint : false)) return;
+      if (!el || (el.id === 'puzzlecanvas' && !CFG.hint)) return;
+      if (!tip.hidden || armedFor === el) return;   // already showing / already waiting
       clearTimeout(timer);
+      armedFor = el;
       var isCanvas = el.id === 'puzzlecanvas';
       timer = setTimeout(function () {
+        armedFor = null;
         if (!on || pressed) return;
         if (isCanvas) show(boardHtml(), lastX, lastY);
         else {
@@ -229,11 +235,13 @@
           place(r.left + r.width / 2 - tip.offsetWidth / 2 - 18, r.bottom - 22 + 8);
         }
       }, isCanvas ? 250 : 400);
-    });
+    }
+    document.addEventListener('pointerover', arm);
     var lastX = 0, lastY = 0;
     document.addEventListener('pointermove', function (e) {
       if (e.pointerType !== 'mouse') return;
       lastX = e.clientX; lastY = e.clientY;
+      arm(e);
       if (!tip.hidden && e.target.closest && e.target.closest('#puzzlecanvas')) place(lastX, lastY);
     });
     document.addEventListener('pointerout', function (e) {

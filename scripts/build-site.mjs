@@ -6,6 +6,7 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 import { CATEGORIES, META } from './puzzles-meta.mjs';
 import { HINTS } from './hints.mjs';
 
@@ -58,6 +59,10 @@ const escAttr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(
 const escText = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const jsonForScript = (v) => JSON.stringify(v).replace(/</g, '\\u003c');
 
+// Version our css/js URLs by content so browsers (and GitHub Pages' cache) never mix old and new files.
+const stamp = (f) => createHash('md5').update(readFileSync(join(out, f))).digest('hex').slice(0, 8);
+const bust = (html) => html.replace(/((?:css|js)\/[\w.-]+\.(?:css|js))"/g, (m, f) => `${f}?v=${stamp(f)}"`);
+
 // ---- 3. Puzzle pages + wasm ----
 const tpl = readFileSync(join(web, 'puzzle.html'), 'utf8');
 for (const p of puzzles) {
@@ -71,14 +76,14 @@ for (const p of puzzles) {
     .replace('{{OBJECTIVE}}', () => escAttr(p.objective))   // first occurrence is in a <meta> attribute
     .replace('{{OBJECTIVE}}', () => escText(p.objective))
     .replace('{{HELP}}', () => p.help);
-  writeFileSync(join(out, 'p', `${p.name}.html`), html);
+  writeFileSync(join(out, 'p', `${p.name}.html`), bust(html));
 }
 
 // ---- 4. Home page ----
 const data = puzzles.map(({ name, title, description, objective, category }) => ({ name, title, description, objective, category }));
-writeFileSync(join(out, 'index.html'), readFileSync(join(web, 'index.html'), 'utf8')
+writeFileSync(join(out, 'index.html'), bust(readFileSync(join(web, 'index.html'), 'utf8')
   .replace('{{COUNT}}', String(puzzles.length))
   .replace('{{DATA}}', () => jsonForScript(data))
-  .replace('{{CATEGORIES}}', () => jsonForScript(CATEGORIES)));
+  .replace('{{CATEGORIES}}', () => jsonForScript(CATEGORIES))));
 
 console.log(`Built ${puzzles.length} puzzles into docs/`);
