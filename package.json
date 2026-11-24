@@ -11,7 +11,9 @@
     "serve": "node scripts/serve.mjs",
     "thumbs": "node scripts/thumbs.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "smoke:touch": "node scripts/smoke-touch.mjs"
+    "smoke:touch": "node scripts/smoke-touch.mjs",
+    "test:games": "node --test test/",
+    "smoke:games": "node scripts/smoke-games.mjs"
   },
   "devDependencies": {
     "puppeteer-core": "^24.0.0"

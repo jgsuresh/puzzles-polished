@@ -33,6 +33,8 @@ npm run site         # re-assemble docs/ only (after editing web/ — no recompi
 npm install && npm run thumbs   # regenerate gallery thumbnails, light + dark (needs Chrome)
 npm run smoke                   # play every puzzle headlessly and fail on any JS error
 npm run smoke:touch             # same on a phone-sized touch viewport, plus layout checks
+npm run smoke:games             # play every two-player game on an emulated phone with real taps
+npm run test:games              # rule tests for the two-player games (no browser needed)
 ```
 
 > Editing `web/css` or `web/js/home.js`/`puzzle-ui.js`/templates only needs `npm run site`.
@@ -77,6 +79,12 @@ Dark mode is a real second palette, not a filter. The canvas gets a dark backgro
 ### Tests
 
 `npm run smoke` loads every puzzle in headless Chrome, clicks and types at it, flips the theme live, starts a new game, and fails on any JS error. `npm run smoke:touch` does it on an emulated phone (taps, drags, no overflow, board clear of the dock).
+
+## Two-player games
+
+A second section for **pass-and-play** board games, meant for handing one phone back and forth: Hex, Y, Havannah, Gomoku, Reversi and Amazons. These are plain ES modules in `web/games/` (no WebAssembly): `core.js` is the shared shell (turn banner coloured for whoever is up, **tap to preview then Confirm** so a stray touch can't commit a move, undo, options dialog, rules sheet) and each game is a small pure-logic object plus a renderer. Rules text is in `scripts/games-meta.mjs`, written in our own words. There is no computer opponent yet.
+
+To add a game: write `web/games/<name>.js` exporting the object described at the top of `core.js`, add it to `scripts/games-meta.mjs`, then `npm run site`, `node scripts/thumbs.mjs --games`, `npm run test:games` and `npm run smoke:games`.
 
 ## Adding or tweaking a puzzle's touch controls
 

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Y · Two-player · Puzzles</title>
+<meta name="description" content="Make one connected group of your stones that touches all three sides of the triangle (corners count for both neighbouring sides).">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('stg-theme'); } catch (e) {}
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+<link rel="stylesheet" href="../css/app.css?v=10085d32">
+</head>
+<body class="page-puzzle page-game">
+
+<div id="apology">
+  <div class="loader" aria-hidden="true"></div>
+  <p class="apology-loading">Loading Y…</p>
+  <noscript><p>This game runs on JavaScript, so it needs JavaScript enabled.</p></noscript>
+</div>
+
+<main id="puzzle">
+<div id="gamemenu">
+
+  <header class="bar">
+    <a class="icon-btn" href="../" aria-label="All games" title="All games">
+      <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+    </a>
+    <h1 class="title">Y</h1>
+    <ul class="bar-actions">
+      <li>
+        <button type="button" class="icon-btn" id="newgame-btn" aria-label="Game options" title="Board size and options">
+          <svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="icon-btn" id="help-btn" aria-label="Rules" title="Rules">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="icon-btn" id="theme-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+      </li>
+    </ul>
+  </header>
+
+  <section class="stage">
+    <div id="statusbar" role="status" aria-live="polite"></div>
+    <div id="board"><svg id="boardsvg" role="application" aria-label="Y board" preserveAspectRatio="xMidYMid meet"></svg></div>
+  </section>
+
+  <nav class="dock" aria-label="Game controls">
+    <ul>
+      <li><button type="button" id="undo" aria-label="Undo" disabled>
+        <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg><span>Undo</span></button></li>
+      <li><button type="button" id="swap" hidden>
+        <svg viewBox="0 0 24 24"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg><span>Swap</span></button></li>
+      <li><button type="button" id="confirm" class="primary" hidden>
+        <svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg><span>Confirm</span></button></li>
+      <li><button type="button" id="new" aria-label="New game">
+        <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg><span>New game</span></button></li>
+    </ul>
+  </nav>
+
+</div>
+</main>
+
+<dialog id="help" class="sheet">
+  <article>
+    <header>
+      <h2>Y</h2>
+      <button type="button" class="icon-btn" id="help-close" aria-label="Close">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </header>
+    <p class="objective">Make one connected group of your stones that touches all three sides of the triangle (corners count for both neighbouring sides).</p>
+    <div class="howto"><p>Players take turns placing a stone on any empty hexagon of the triangular board. Stones never move.</p>
+<p>You win as soon as one connected group of your stones touches all three sides. Corner hexagons count as part of both sides they touch. Like Hex, Y can never end in a draw: whoever fills the board's last gap, exactly one player has a Y.</p><p><strong>Swap rule (optional).</strong> To keep the first move fair, you can turn on the swap rule in the options: after the first stone is placed, the second player may press <em>Swap</em> to take that stone as their own instead of playing a move.</p>
+<p>Tip: the centre of the triangle is the strongest area, since it is closest to all three sides.</p></div>
+    <p class="shortcuts"><strong>Passing the phone?</strong> Tap a square to preview your move, then press <em>Confirm</em> (or tap the same square again) and hand the device over.</p>
+  </article>
+</dialog>
+
+<dialog id="newgame" class="sheet">
+  <form id="newgame-form" method="dialog">
+    <header><h2>New Y game</h2></header>
+    <div id="newgame-fields"></div>
+    <div class="sheet-actions">
+      <button type="button" id="newgame-cancel">Cancel</button>
+      <button type="submit" class="go">Start</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script type="module">
+  import def from './y.js?v=5a7d3fde';
+  import { mountGame } from './core.js?v=1a852cc1';
+  mountGame(def);
+</script>
+</body>
+</html>

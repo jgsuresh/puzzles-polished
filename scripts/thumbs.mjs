@@ -20,7 +20,9 @@ const candidates = [
 const executablePath = candidates.find((p) => existsSync(p));
 if (!executablePath) throw new Error('Chrome not found; set CHROME_PATH');
 
-const names = readdirSync(join(root, 'docs', 'p')).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5));
+const gamesOnly = process.argv.includes('--games');   // only (re)make the two-player thumbnails
+const names = gamesOnly ? [] : readdirSync(join(root, 'docs', 'p')).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5));
+const gameNames = readdirSync(join(root, 'docs', 'g')).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5));
 const server = await serve(8099);
 const browser = await puppeteer.launch({ executablePath, headless: true });
 try {
@@ -42,6 +44,28 @@ try {
       await new Promise((r) => setTimeout(r, 400));
       const canvas = await page.$('#puzzlecanvas');
       await canvas.screenshot({ path: join(outDir, theme === 'dark' ? `${name}-dark.png` : `${name}.png`), type: 'png' });
+      await page.close();
+      console.log('thumb', theme, name);
+    }
+    // Two-player games: play a dozen random moves so the board isn't empty.
+    for (const name of gameNames) {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 560, height: 700, deviceScaleFactor: 2 });
+      await page.evaluateOnNewDocument((t) => localStorage.setItem('stg-theme', t), theme);
+      page.on('pageerror', (e) => console.log(`  [${name}/${theme}] pageerror:`, e.message));
+      await page.goto(`http://localhost:8099/g/${name}.html`);
+      await page.waitForSelector('#boardsvg [data-c]');
+      await page.evaluate((n) => {
+        const g = window.stgGame;
+        for (let i = 0; i < n; i++) {
+          if (g.def.result(g.state)) break;
+          const ms = g.def.moves(g.state).filter((x) => x !== 'swap' && x !== 'pass');
+          if (!ms.length) break;
+          g.commit(ms[Math.floor(Math.random() * ms.length)]);
+        }
+      }, name === 'gomoku' ? 22 : name === 'reversi' ? 14 : name === 'amazons' ? 8 : 16);
+      await new Promise((r) => setTimeout(r, 400));
+      await (await page.$('#boardsvg')).screenshot({ path: join(outDir, theme === 'dark' ? `${name}-dark.png` : `${name}.png`), type: 'png' });
       await page.close();
       console.log('thumb', theme, name);
     }

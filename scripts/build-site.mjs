@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { CATEGORIES, META } from './puzzles-meta.mjs';
 import { HINTS } from './hints.mjs';
+import { GAMES } from './games-meta.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const up = join(root, '.upstream');
@@ -45,7 +46,8 @@ if (puzzles.length < 30) throw new Error(`Only found ${puzzles.length} puzzles -
 
 // ---- 2. Output tree ----
 rmSync(join(out, 'p'), { recursive: true, force: true });
-for (const d of ['p', 'css', 'js', 'thumbs']) mkdirSync(join(out, d), { recursive: true });
+rmSync(join(out, 'g'), { recursive: true, force: true });
+for (const d of ['p', 'g', 'css', 'js', 'thumbs']) mkdirSync(join(out, d), { recursive: true });
 
 copyFileSync(join(web, 'icon.svg'), join(out, 'icon.svg'));
 copyFileSync(join(web, 'css/app.css'), join(out, 'css/app.css'));
@@ -79,11 +81,36 @@ for (const p of puzzles) {
   writeFileSync(join(out, 'p', `${p.name}.html`), bust(html));
 }
 
+
+// ---- 3b. Two-player games (plain ES modules, no WebAssembly) ----
+const gdir = join(web, 'games');
+const hashOf = (f) => createHash('md5').update(readFileSync(join(gdir, f))).digest('hex').slice(0, 8);
+for (const f of readdirSync(gdir).filter((n) => n.endsWith('.js'))) {
+  // Version the relative imports too, so a changed core.js can't pair with a cached game file.
+  const src = readFileSync(join(gdir, f), 'utf8').replace(/from '\.\/(\w+)\.js'/g, (m, n) => `from './${n}.js?v=${hashOf(n + '.js')}'`);
+  writeFileSync(join(out, 'g', f), src);
+}
+const gtpl = readFileSync(join(web, 'game.html'), 'utf8');
+for (const g of GAMES) {
+  const html = gtpl
+    .replaceAll('{{TITLE}}', escText(g.title))
+    .replaceAll('{{GAME_URL}}', `./${g.name}.js?v=${hashOf(g.name + '.js')}`)
+    .replaceAll('{{CORE_URL}}', `./core.js?v=${hashOf('core.js')}`)
+    .replace('{{OBJECTIVE}}', () => escAttr(g.objective))
+    .replace('{{OBJECTIVE}}', () => escText(g.objective))
+    .replace('{{RULES}}', () => g.rules);
+  writeFileSync(join(out, 'g', `${g.name}.html`), bust(html));
+}
+
 // ---- 4. Home page ----
-const data = puzzles.map(({ name, title, description, objective, category }) => ({ name, title, description, objective, category }));
+const data = [
+  ...puzzles.map(({ name, title, description, objective, category }) => ({ name, title, description, objective, category })),
+  ...GAMES.map(({ name, title, description, objective }) => ({ name, title, description, objective, category: 'twoplayer', href: `g/${name}.html` })),
+];
 writeFileSync(join(out, 'index.html'), bust(readFileSync(join(web, 'index.html'), 'utf8')
   .replace('{{COUNT}}', String(puzzles.length))
+  .replace('{{GAMECOUNT}}', String(GAMES.length))
   .replace('{{DATA}}', () => jsonForScript(data))
-  .replace('{{CATEGORIES}}', () => jsonForScript(CATEGORIES))));
+  .replace('{{CATEGORIES}}', () => jsonForScript([...CATEGORIES, { id: 'twoplayer', label: 'Two-player' }]))));
 
-console.log(`Built ${puzzles.length} puzzles into docs/`);
+console.log(`Built ${puzzles.length} puzzles and ${GAMES.length} two-player games into docs/`);
