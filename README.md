@@ -28,7 +28,8 @@ You need `git`, `node`, `cmake`, `perl` and the [Emscripten SDK](https://emscrip
 ```bash
 npm run build        # fetch upstream @ pinned commit -> patch glue -> compile to WASM -> assemble docs/
 npm run site         # re-assemble docs/ only (after editing web/ — no recompile)
-npm install && npm run thumbs   # regenerate gallery thumbnails (needs Chrome)
+npm install && npm run thumbs   # regenerate gallery thumbnails, light + dark (needs Chrome)
+npm run smoke                   # play every puzzle headlessly and fail on any JS error
 ```
 
 > Editing `web/css` or `web/js/home.js`/`puzzle-ui.js`/templates only needs `npm run site`.
@@ -53,28 +54,26 @@ Upstream's glue expects certain element IDs (`#new`, `#undo`, `#gametype`, `#puz
 - expose the C input functions so the touch/keypad layer can drive the puzzle,
 - compute pointer coordinates from `getBoundingClientRect()` (robust inside flex/transformed layouts),
 - route errors to toasts instead of `alert()`,
-- pass every palette colour through a recolouring hook (`stgRecolour`) — saturated colours are softened and black becomes soft ink.
+- pass every palette colour through a recolouring hook (`stgRecolour`) — saturated colours are softened and black becomes soft ink,
+- add `refresh_colours()` so the theme can change live, and guard upstream's menu key handler (our canvas lives inside its form).
 
-Dark mode inverts the canvas with a hue-preserving CSS filter, because the engines hard-code black ink on a light palette.
 
-## Skins (deeper redesign, in progress)
+## Skins
 
-Beyond the palette, individual games can be *re-skinned*. The patched glue offers every drawing primitive the engine emits (`rect`, `line`, `poly`, `circle`, `text`) to a per-game skin first; a skin returns `true` if it drew the call itself. Engines identify colours by semantic index (`COL_MINE`, `COL_HIGHLIGHT`…), so a skin knows *what* it is drawing. Skins can also override individual palette slots. They live in [`web/js/skins.js`](web/js/skins.js); add `?skin=off` to a puzzle URL to compare with stock drawing.
+Every puzzle has its own skin. The patched glue offers each drawing primitive the engine emits (`rect`, `line`, `poly`, `circle`, `text`) to a per-game skin first; a skin returns `true` if it drew the call itself. Engines identify colours by semantic index (`COL_MINE`, `COL_HIGHLIGHT`…), so a skin knows *what* it is drawing, and it can override individual palette slots. Skins live in [`web/js/skins.js`](web/js/skins.js); add `?skin=off` to a puzzle URL to compare with stock drawing.
 
-| Skinned | What changed |
-|---|---|
-| Mines | raised, rounded tiles with soft shadows; recessed opened cells; redrawn bomb and flag; slimmer board margin (small C patch) |
-| Net | rounded endpoint boxes, slate wires with a glowing power core |
-| Solo | bold givens vs indigo player entries, faint cell lines with strong box borders, soft rounded selection |
-| Loopy | indigo round-capped loop ribbons, softer dots, bold clues |
-| Flood | curated candy palette, glossy tiles, white region separators instead of the bevelled frame |
-| Fifteen | rounded gradient tiles with soft shadows, recessed empty slot, bold numerals |
-| Light Up | rounded slate walls, glowing bulbs, warm lit corridors, soft "can't be a light" dots |
-| Pattern | rounded cells, indigo filled squares, dotted marked-empty cells, bold clues |
+- **Hand-drawn skins** (shapes redrawn): Mines, Net, Netslide, Solo, Loopy, Flood, Fifteen, Sixteen, Light Up, Pattern, Unruly, Samegame, Pegs, Blackbox.
+- **Declarative skins** (the rest): a theme-aware palette (ink, accent, danger, soft grid lines, candy colours) plus bold typography, defined in a few lines each with `def(name, colourNames, palette)`.
 
-Where the JS layer can't reach (layout constants, margins), `scripts/patch-glue.mjs` also carries small asserted patches to the engines' C source, applied to the pinned upstream commit before compiling.
+Where the JS layer can't reach (layout constants, margins, exports), `scripts/patch-glue.mjs` also carries small asserted patches to the engines' C source, applied to the pinned upstream commit before compiling.
 
-Known limit: dark mode is a CSS inversion of the light rendering, so depth cues (e.g. raised vs. recessed tiles in Mines) flip. Giving skins their own dark palettes is the natural next step.
+### Dark mode
+
+Dark mode is a real second palette, not a filter. The canvas gets a dark background colour, so the engines derive their own highlights and shadows from it; a generic remap turns their hard-coded black/white into ink, and each skin picks per-theme colours from shared tokens (`tk()`). Switching theme mid-game calls an exported `refresh_colours()` (a tiny C patch) so the engine re-announces its palette and redraws, with no reload and no lost progress.
+
+### Tests
+
+`npm run smoke` loads every puzzle in headless Chrome, clicks and types at it, flips the theme live, starts a new game, and fails on any JS error.
 
 ## Adding or tweaking a puzzle's touch controls
 

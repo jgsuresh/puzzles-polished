@@ -15,7 +15,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const up = join(root, '.upstream');
 
 // Start from pristine upstream so the script is idempotent.
-const PATCHED_FILES = ['emccpre.js', 'emcclib.js', 'mines.c'];
+const PATCHED_FILES = ['emccpre.js', 'emcclib.js', 'mines.c', 'emcc.c', 'cmake/platforms/emscripten.cmake'];
 execFileSync('git', ['-C', up, 'checkout', '--', ...PATCHED_FILES], { stdio: 'inherit' });
 
 function patch(file, edits) {
@@ -49,6 +49,14 @@ patch('emccpre.js', [
     name: 'robust mouse coordinates',
     from: 'var rcoords = relative_mouse_coords(event, element);',
     to: 'var rect = element.getBoundingClientRect();\n    var rcoords = {x: event.clientX - rect.left, y: event.clientY - rect.top};',
+  },
+  {
+    // Upstream attaches this handler to the whole <form>, whose only descendants
+    // were menu items. Our canvas lives inside the form too, so key events from
+    // the board bubbled into it and crashed on `null.closest`.
+    name: 'menukey: ignore events from outside menus',
+    from: 'var thisitem = target.closest("li");\n        var thismenu = thisitem.closest("ul");',
+    to: 'var thisitem = target.closest("li");\n        if (thisitem === null) return;\n        var thismenu = thisitem.closest("ul");',
   },
   {
     name: 'no alert() on error',
@@ -117,6 +125,42 @@ patch('mines.c', [
     from: '#define BORDER max(TILE_SIZE * 3 / 2, ARROW_DIST+ARROW_HEAD_WIDTH + 2)',
     to: '#define BORDER (IS_CYCLIC(ds->grid->type) ? ARROW_DIST+ARROW_HEAD_WIDTH + 4 : TILE_SIZE / 2)',
   },
+]);
+
+patch('emcc.c', [
+  {
+    // Colours are normally announced once at startup. Re-announcing them (after
+    // the page theme changed) lets the engine rebuild its palette from the new
+    // background colour and redraw, so dark mode needs no reload.
+    name: 'refresh_colours()',
+    from: 'void rescale_puzzle(void)\n{\n    resize();\n    midend_force_redraw(me);\n}',
+    to: `void rescale_puzzle(void)
+{
+    resize();
+    midend_force_redraw(me);
+}
+
+/* Called from JS when the page theme (and so the default background) changes */
+void refresh_colours(void)
+{
+    int i, n;
+    float *c = midend_colours(me, &n);
+    for (i = 0; i < n; i++) {
+        char col[40];
+        sprintf(col, "#%02x%02x%02x",
+                (unsigned)(0.5F + 255 * c[i*3+0]),
+                (unsigned)(0.5F + 255 * c[i*3+1]),
+                (unsigned)(0.5F + 255 * c[i*3+2]));
+        js_set_colour(i, col);
+    }
+    sfree(c);
+    midend_force_redraw(me);
+}`,
+  },
+]);
+
+patch('cmake/platforms/emscripten.cmake', [
+  { name: 'export refresh_colours', from: '  _rescale_puzzle\n', to: '  _rescale_puzzle\n  _refresh_colours\n' },
 ]);
 
 console.log('Patched upstream glue and engines.');

@@ -36,6 +36,7 @@
   --accent-soft: rgba(139, 135, 255, 0.16);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.4), 0 20px 48px rgba(0, 0, 0, 0.6);
+  --puzzle-bg: #1d2240;
   color-scheme: dark;
 }
 
@@ -222,9 +223,6 @@ body.page-puzzle { overflow: hidden; overscroll-behavior: none; }
   font-weight: 600;
   transition: box-shadow 0.4s;
 }
-/* The engines hard-code black text/lines, so dark mode is done as an inversion
-   that keeps hues intact. It maps the cream background to a deep navy. */
-:root[data-theme="dark"] #puzzlecanvas { filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.95); }
 #puzzlecanvas:focus-visible { box-shadow: var(--shadow-lg), 0 0 0 3px var(--accent); }
 #puzzlecanvas.solved { box-shadow: var(--shadow-lg), 0 0 0 4px var(--good), 0 0 40px rgba(22, 163, 74, 0.35); }
 
@@ -532,7 +530,7 @@ body.page-home { min-height: 100dvh; }
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
-:root[data-theme="dark"] .card .thumb img { filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.95); }
+:root[data-theme="dark"] .card .thumb .t-light, :root:not([data-theme="dark"]) .card .thumb .t-dark { display: none; }
 .card .meta { padding: 12px 14px 14px; }
 .card h2 { margin: 0; font-size: 1.05rem; letter-spacing: -0.01em; }
 .card p { margin: 3px 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.35; }

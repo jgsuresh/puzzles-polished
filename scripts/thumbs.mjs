@@ -24,25 +24,27 @@ const names = readdirSync(join(root, 'docs', 'p')).filter((f) => f.endsWith('.ht
 const server = await serve(8099);
 const browser = await puppeteer.launch({ executablePath, headless: true });
 try {
-  for (const name of names) {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 560, height: 640, deviceScaleFactor: 2 });
-    await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: 'light' }]);
-    await page.evaluateOnNewDocument(() => localStorage.setItem('stg-theme', 'light'));
-    page.on('pageerror', (e) => console.log(`  [${name}] pageerror:`, e.message));
-    await page.goto(`http://localhost:8099/p/${name}.html`);
-    try {
-      await page.waitForFunction(() => document.getElementById('puzzle')?.style.visibility === 'visible', { timeout: 15000 });
-    } catch {
-      console.log(`  [${name}] did not start, skipping`);
+  for (const theme of ['light', 'dark']) {
+    for (const name of names) {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 560, height: 640, deviceScaleFactor: 2 });
+      await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: theme }]);
+      await page.evaluateOnNewDocument((t) => localStorage.setItem('stg-theme', t), theme);
+      page.on('pageerror', (e) => console.log(`  [${name}/${theme}] pageerror:`, e.message));
+      await page.goto(`http://localhost:8099/p/${name}.html`);
+      try {
+        await page.waitForFunction(() => document.getElementById('puzzle')?.style.visibility === 'visible', { timeout: 15000 });
+      } catch {
+        console.log(`  [${name}/${theme}] did not start, skipping`);
+        await page.close();
+        continue;
+      }
+      await new Promise((r) => setTimeout(r, 400));
+      const canvas = await page.$('#puzzlecanvas');
+      await canvas.screenshot({ path: join(outDir, theme === 'dark' ? `${name}-dark.png` : `${name}.png`), type: 'png' });
       await page.close();
-      continue;
+      console.log('thumb', theme, name);
     }
-    await new Promise((r) => setTimeout(r, 400));
-    const canvas = await page.$('#puzzlecanvas');
-    await canvas.screenshot({ path: join(outDir, `${name}.png`), type: 'png' });
-    await page.close();
-    console.log('thumb', name);
   }
 } finally {
   await browser.close();

@@ -39,7 +39,7 @@
     var out = baseRecolour(index, colour);
     // A skin may then override individual palette slots outright.
     var sk = window.stgSkin;
-    return sk && sk.palette ? (sk.palette(index, out) || out) : out;
+    return sk && sk.palette ? (sk.palette(index, out, colour) || out) : out;
   };
   function baseRecolour(index, colour) {
     if (index === 0) return colour;
@@ -47,12 +47,19 @@
     if (!m) return colour;
     var hsl = rgb2hsl(parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16));
     var h = hsl[0], s = hsl[1], l = hsl[2];
-    if (s < 0.15) return l < 0.1 ? '#232a3d' : colour;
+    var dark = document.documentElement.dataset.theme === 'dark';
+    if (s < 0.15) {
+      if (l < 0.1) return dark ? '#e6e9f6' : '#232a3d';   // the engines' hard-coded black ink
+      if (l > 0.92 && dark) return '#dfe3f2';              // and white
+      return colour;
+    }
     var s2 = s * 0.78, l2 = l, h2 = h;
     if (h >= 45 && h < 75) { h2 = h - 12; l2 = l * 0.96; }                 // yellow -> amber
     else if (h >= 75 && h < 170) { h2 = h + (h > 100 ? 22 : 5); l2 = l * 0.82; } // neon green -> emerald
     else if (h >= 170 && h < 200) { l2 = l * 0.88; }                       // cyan -> teal
     else if (h >= 200 && h < 265) { h2 = h + 8; }                          // blue -> indigo-ish
+    // On a dark board, compress lightness toward the middle so hues glow without glaring.
+    if (dark) { l2 = 0.62 + (l2 - 0.5) * 0.4; s2 = Math.min(1, s2 * 1.05); }
     return hsl2hex(h2, s2, l2);
   }
 
@@ -89,6 +96,11 @@
   applyTheme(document.documentElement.dataset.theme || 'light');
   $('#theme-btn').addEventListener('click', function () {
     applyTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+    // Make the engine rebuild its palette from the new background and redraw.
+    if (window.stgRefresh) {
+      document.documentElement.style.removeProperty('--puzzle-background');
+      window.stgRefresh();
+    }
   });
 
   /* ---------- Menus ---------- */
@@ -158,6 +170,7 @@
 
     /* Keep the game fitted to its container, however the layout changes
        (rotation, keypad appearing, soft keyboards, split-screen...). */
+    window.stgRefresh = Module.cwrap('refresh_colours', 'void', []);
     var rescale = Module.cwrap('rescale_puzzle', 'void', []);
     var raf = 0;
     new ResizeObserver(function () {

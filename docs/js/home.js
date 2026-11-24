@@ -43,7 +43,8 @@
     });
     grid.innerHTML = list.length ? list.map(function (p) {
       return '<a class="card" href="p/' + p.name + '.html">' +
-        '<div class="thumb"><img src="thumbs/' + p.name + '.png" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div>' +
+        '<div class="thumb"><img class="t-light" src="thumbs/' + p.name + '.png" alt="" loading="lazy" decoding="async" onerror="this.remove()">' +
+        '<img class="t-dark" src="thumbs/' + p.name + '-dark.png" alt="" loading="lazy" decoding="async" onerror="this.remove()"></div>' +
         '<div class="meta"><h2>' + esc(p.title) + '</h2><p>' + esc(p.description) + '</p>' +
         '<span class="tag">' + esc(catLabel[p.category]) + '</span></div></a>';
     }).join('') : '<p class="empty">No puzzles match “' + esc(q) + '”.</p>';
