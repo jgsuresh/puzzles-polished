@@ -16,7 +16,7 @@
   })();
 </script>
 <link rel="stylesheet" href="../css/app.css">
-<script>window.STG = {"name":"twiddle","modes":[],"keypad":null,"pencil":false,"digitColours":false};</script>
+<script>window.STG = {"name":"twiddle","modes":[],"keypad":null,"pencil":false,"digitColours":false,"hint":{"l":"Rotate the block under the pointer anticlockwise","r":"Rotate it clockwise","tip":"Click where the group's centre is (a corner where four tiles meet for 2×2). Put the numbers in order"}};</script>
 <script defer src="../js/puzzle-ui.js"></script>
 <script defer src="../js/skins.js"></script>
 <script defer src="twiddle.js"></script>
@@ -35,20 +35,20 @@
 <form id="gamemenu" onsubmit="return false" autocomplete="off">
 
   <header class="bar">
-    <a class="icon-btn" href="../" aria-label="All puzzles" title="All puzzles">
+    <a class="icon-btn" href="../" aria-label="All puzzles" data-hint="Back to all puzzles">
       <svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
     </a>
     <h1 class="title">Twiddle</h1>
     <ul class="bar-actions">
       <li class="menu">
-        <button type="button" class="chip menu-trigger" aria-haspopup="true" aria-expanded="false">
+        <button type="button" class="chip menu-trigger" aria-haspopup="true" aria-expanded="false" data-hint="Change size and difficulty">
           <span>Type</span>
           <svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <ul role="menu" id="gametype" class="popup"></ul>
       </li>
       <li class="menu">
-        <button type="button" class="icon-btn menu-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Game menu" title="Game menu">
+        <button type="button" class="icon-btn menu-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Game menu" data-hint="Game IDs, save files, preferences">
           <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
         </button>
         <ul class="popup right">
@@ -62,13 +62,18 @@
           <li><a id="permalink-seed" href="#" class="menu-link">Copy link to this seed</a></li>
         </ul>
       </li>
+      <li class="hover-only">
+        <button type="button" class="icon-btn" id="hints-btn" aria-pressed="true" aria-label="Mouseover hints" data-hint="Turn mouseover hints on or off">
+          <svg viewBox="0 0 24 24"><path d="m4 4 7.07 17 2.51-7.39L21 11.07z"/></svg>
+        </button>
+      </li>
       <li>
-        <button type="button" class="icon-btn" id="help-btn" aria-label="How to play" title="How to play">
+        <button type="button" class="icon-btn" id="help-btn" aria-label="How to play" data-hint="How to play this puzzle">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
         </button>
       </li>
       <li>
-        <button type="button" class="icon-btn" id="theme-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <button type="button" class="icon-btn" id="theme-btn" aria-label="Toggle dark mode" data-hint="Switch light / dark">
           <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
           <svg class="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
         </button>
@@ -90,15 +95,15 @@
 
   <nav class="dock" aria-label="Game controls">
     <ul>
-      <li><button type="button" id="undo" aria-label="Undo">
+      <li><button type="button" id="undo" aria-label="Undo" data-hint="Take back your last move (U)">
         <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg><span>Undo</span></button></li>
-      <li><button type="button" id="redo" aria-label="Redo">
+      <li><button type="button" id="redo" aria-label="Redo" data-hint="Replay a move you took back (R)">
         <svg viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg><span>Redo</span></button></li>
-      <li><button type="button" id="restart" aria-label="Restart">
+      <li><button type="button" id="restart" aria-label="Restart" data-hint="Start this same puzzle over">
         <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span>Restart</span></button></li>
-      <li><button type="button" id="solve" aria-label="Solve">
+      <li><button type="button" id="solve" aria-label="Solve" data-hint="Show the solution (you can undo it)">
         <svg viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg><span>Solve</span></button></li>
-      <li><button type="button" id="new" class="primary" aria-label="New game">
+      <li><button type="button" id="new" class="primary" aria-label="New game" data-hint="Generate a fresh puzzle (N)">
         <svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg><span>New game</span></button></li>
     </ul>
   </nav>

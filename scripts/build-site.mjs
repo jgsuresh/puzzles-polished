@@ -7,6 +7,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync,
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CATEGORIES, META } from './puzzles-meta.mjs';
+import { HINTS } from './hints.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const up = join(root, '.upstream');
@@ -62,7 +63,7 @@ const tpl = readFileSync(join(web, 'puzzle.html'), 'utf8');
 for (const p of puzzles) {
   copyFileSync(join(buildDir, `${p.name}.js`), join(out, 'p', `${p.name}.js`));
   copyFileSync(join(buildDir, `${p.name}.wasm`), join(out, 'p', `${p.name}.wasm`));
-  const config = { name: p.name, modes: p.meta.modes ?? ['left', 'right'], keypad: p.meta.keypad ?? null, pencil: !!p.meta.pencil, digitColours: !!p.meta.digitColours };
+  const config = { name: p.name, modes: p.meta.modes ?? ['left', 'right'], keypad: p.meta.keypad ?? null, pencil: !!p.meta.pencil, digitColours: !!p.meta.digitColours, hint: HINTS[p.name] ?? null };
   const html = tpl
     .replaceAll('{{TITLE}}', escText(p.title))
     .replaceAll('{{NAME}}', p.name)

@@ -159,6 +159,95 @@
   $('#help-close').addEventListener('click', function () { help.close(); });
   help.addEventListener('click', function (e) { if (e.target === help) help.close(); });
 
+  /* ---------- Mouseover hints ----------
+     A small tooltip says what each mouse button does on this board, and what the
+     toolbar buttons do. Mouse only (touch has no hover); toggle in the header. */
+  (function () {
+    var btn = $('#hints-btn');
+    var on = true;
+    try { on = localStorage.getItem('stg-hints') !== '0'; } catch (e) {}
+    var tip = document.createElement('div');
+    tip.className = 'hint-tip';
+    tip.setAttribute('role', 'tooltip');
+    tip.hidden = true;
+    document.body.appendChild(tip);
+    var timer = 0, pressed = false;
+
+    function boardHtml() {
+      var h = CFG.hint;
+      if (!h) return '';
+      var rows = [['Click', h.l], ['Right-click', h.r], ['Middle-click', h.m], ['Drag', h.d], ['Keys', h.k]];
+      var html = rows.filter(function (r) { return r[1]; }).map(function (r) {
+        return '<div><b>' + r[0] + '</b><span>' + esc(r[1]) + '</span></div>';
+      }).join('');
+      if (h.tip) html += '<p>' + esc(h.tip) + '</p>';
+      return html;
+    }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function place(x, y) {
+      var w = tip.offsetWidth, h = tip.offsetHeight;
+      var left = x + 18, top = y + 22;
+      if (left + w > innerWidth - 8) left = Math.max(8, x - w - 14);
+      if (top + h > innerHeight - 8) top = Math.max(8, y - h - 14);
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
+    }
+    function show(html, x, y) {
+      tip.innerHTML = html;
+      tip.hidden = false;
+      place(x, y);
+    }
+    function hide() { clearTimeout(timer); tip.hidden = true; }
+
+    function sync() {
+      if (btn) btn.setAttribute('aria-pressed', String(on));
+      if (!on) hide();
+      // With hints off, fall back to the browser's own tooltips on buttons.
+      $$('[data-hint]').forEach(function (el) {
+        if (on) el.removeAttribute('title'); else el.title = el.getAttribute('data-hint');
+      });
+    }
+    if (btn) btn.addEventListener('click', function () {
+      on = !on;
+      try { localStorage.setItem('stg-hints', on ? '1' : '0'); } catch (e) {}
+      sync();
+    });
+
+    document.addEventListener('pointerover', function (e) {
+      if (!on || e.pointerType !== 'mouse') return;
+      var el = e.target.closest && e.target.closest('[data-hint], #puzzlecanvas');
+      if (!el || (el.matches('#puzzlecanvas') ? !CFG.hint : false)) return;
+      clearTimeout(timer);
+      var isCanvas = el.id === 'puzzlecanvas';
+      timer = setTimeout(function () {
+        if (!on || pressed) return;
+        if (isCanvas) show(boardHtml(), lastX, lastY);
+        else {
+          var r = el.getBoundingClientRect();
+          tip.innerHTML = esc(el.getAttribute('data-hint'));
+          tip.hidden = false;
+          place(r.left + r.width / 2 - tip.offsetWidth / 2 - 18, r.bottom - 22 + 8);
+        }
+      }, isCanvas ? 250 : 400);
+    });
+    var lastX = 0, lastY = 0;
+    document.addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      lastX = e.clientX; lastY = e.clientY;
+      if (!tip.hidden && e.target.closest && e.target.closest('#puzzlecanvas')) place(lastX, lastY);
+    });
+    document.addEventListener('pointerout', function (e) {
+      if (e.pointerType !== 'mouse') return;
+      var to = e.relatedTarget;
+      if (!to || !to.closest || !to.closest('[data-hint], #puzzlecanvas') || to.closest('[data-hint], #puzzlecanvas') !== e.target.closest('[data-hint], #puzzlecanvas')) hide();
+    });
+    // Get out of the way while playing: hide on press, come back after release.
+    document.addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse') { pressed = true; hide(); } }, true);
+    document.addEventListener('pointerup', function () { pressed = false; }, true);
+    document.addEventListener('keydown', hide, true);
+    sync();
+  })();
+
   try { window.stgDigitColours = localStorage.getItem('stg-digit-colours') === '1'; } catch (e) { window.stgDigitColours = false; }
 
   /* ---------- Once the puzzle is up ---------- */
