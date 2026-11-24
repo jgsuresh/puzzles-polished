@@ -1,6 +1,6 @@
 // Hex: Red joins top to bottom, Blue joins left to right. No draws are possible.
 import { h } from './core.js';
-import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js';
+import { hexXY, hexVerts, pts, boundsOf, DIRS, bfsPath } from './hexgeom.js';
 
 const nbCache = new Map();
 function neighbours(n) {
@@ -69,6 +69,13 @@ export default {
     const mover = 1 - s.turn;
     return connected(s.b, s.n, mover) ? { winner: mover } : null;
   },
+  winInfo(s, res) {
+    const n = s.n, p = res.winner, v = p + 1, nb = neighbours(n);
+    const src = []; for (let k = 0; k < n; k++) src.push(p === 0 ? k : k * n);
+    const path = bfsPath(nb, src, (i) => s.b[i] === v, (i) => (p === 0 ? i >= n * (n - 1) : i % n === n - 1));
+    return path && { path };
+  },
+
   tap(s, ui, c) {
     const i = +c;
     return s.b[i] ? null : { move: i };

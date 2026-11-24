@@ -1,6 +1,6 @@
 // Game of the Amazons: move a queen like a chess queen, then shoot an arrow from where
 // it lands; arrows burn their square for the rest of the game. If you can't move, you lose.
-import { h } from './core.js?v=fece9af1';
+import { h } from './core.js?v=09554f26';
 
 const N = 10;
 const DIRS8 = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
@@ -53,6 +53,12 @@ export default {
   },
   result(s) {
     return canMove(s.b, s.turn + 1) ? null : { winner: 1 - s.turn };
+  },
+
+  winInfo(s, res) {
+    const lose = [];
+    for (let i = 0; i < s.b.length; i++) if (s.b[i] === 2 - res.winner) lose.push(i);   // the loser's queens
+    return { lose };
   },
 
   newUi() { return { from: -1, to: -1 }; },

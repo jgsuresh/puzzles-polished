@@ -3,7 +3,7 @@
 //   (b) turn two neutral stones into yours and one of your stones into a neutral.
 // Red joins top to bottom, Blue joins left to right.
 import { h } from './core.js';
-import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js';
+import { hexXY, hexVerts, pts, boundsOf, DIRS, bfsPath } from './hexgeom.js';
 
 const cache = new Map();
 function neighbours(n) {
@@ -84,6 +84,13 @@ export default {
     if (s.won >= 0) return { winner: s.won };
     if (!hasMove(s)) return { winner: 1 - s.turn };
     return null;
+  },
+
+  winInfo(s, res) {
+    const n = s.n, p = res.winner, v = p + 1, nb = neighbours(n);
+    const src = []; for (let k = 0; k < n; k++) src.push(p === 0 ? k : k * n);
+    const path = bfsPath(nb, src, (i) => s.b[i] === v, (i) => (p === 0 ? i >= n * (n - 1) : i % n === n - 1));
+    return path && { path };
   },
 
   newUi() { return { a: -1, neu: [] }; },

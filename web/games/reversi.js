@@ -51,6 +51,12 @@ export default {
     return `${this.players[s.turn].name} to move · ${count(s.b, 1)}–${count(s.b, 2)}`;
   },
 
+  winInfo(s, res) {
+    const cells = [];
+    for (let i = 0; i < s.b.length; i++) if (s.b[i] === res.winner + 1) cells.push(i);
+    return { cells };
+  },
+
   tap(s, ui, c) { return flipsFor(s.b, +c, s.turn + 1).length ? { move: +c } : null; },
   render({ svg, s, res }) {
     svg.replaceChildren();

@@ -74,6 +74,23 @@ export default {
     const mover = 1 - s.turn;
     return hasY(s.b, s.n, mover + 1) ? { winner: mover } : null;
   },
+  winInfo(s, res) {
+    const { nb, side, total } = topo(s.n), v = res.winner + 1, seen = new Uint8Array(total);
+    for (let i = 0; i < total; i++) {
+      if (s.b[i] !== v || seen[i]) continue;
+      const comp = [i], st = [i];
+      seen[i] = 1;
+      let mask = 0;
+      while (st.length) {
+        const k = st.pop();
+        mask |= side[k];
+        for (const j of nb[k]) if (!seen[j] && s.b[j] === v) { seen[j] = 1; st.push(j); comp.push(j); }
+      }
+      if (mask === 7) return { cells: comp };
+    }
+    return null;
+  },
+
   tap(s, ui, c) { return s.b[+c] ? null : { move: +c }; },
   render({ svg, s }) {
     const n = s.n, { total, rc } = topo(n);

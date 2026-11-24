@@ -10,6 +10,9 @@
 //   result(s)  -> null | {winner: 0|1|-1}   -1 = draw
 //   render({svg,s,ui,res,theme}), tap(s,ui,c) -> {move} | {redraw:true} | null, newUi()
 //   status(s,ui) -> optional text replacing "<Name> to move"
+//   winInfo(s,res) -> optional {path:[cell..], cells:[cell..], lose:[cell..]}: what to light up on the win screen.
+//        path = ordered cells joined by a drawn line (a chain from A to B); cells = a group to ring;
+//        lose = cells to mark as the loser's (e.g. trapped queens).
 
 export const NS = 'http://www.w3.org/2000/svg';
 export function h(tag, attrs, parent) {
@@ -57,9 +60,43 @@ export function mountGame(def) {
     return extra || `${def.players[s.turn].name} to move`;
   }
 
+  // Win screen: dim the board, ring the winning cells and draw the winning line from A to B.
+  function showWin(res) {
+    svg.classList.toggle('won', !!res);
+    if (!res || !def.winInfo || res.winner < 0) return;
+    let info = null;
+    try { info = def.winInfo(s, res); } catch (e) { console.error(e); }
+    if (!info) return;
+    const centre = (c) => {
+      const g = svg.querySelector(`[data-c="${c}"]`);
+      if (!g) return null;
+      const b = g.getBBox();
+      return { x: b.x + b.width / 2, y: b.y + b.height / 2, r: Math.min(b.width, b.height) * 0.46 };
+    };
+    const ring = (c, cls) => {
+      const g = svg.querySelector(`[data-c="${c}"]`), p = centre(c);
+      if (!g || !p) return;
+      if (cls === 'win') g.classList.add('win');
+      h('circle', { cx: p.x, cy: p.y, r: p.r, class: cls === 'win' ? 'win-ring' : 'lose-ring', 'pointer-events': 'none' }, svg);
+    };
+    (info.cells || []).forEach((c) => ring(c, 'win'));
+    (info.path || []).forEach((c) => { const g = svg.querySelector(`[data-c="${c}"]`); if (g) g.classList.add('win'); });
+    (info.lose || []).forEach((c) => ring(c, 'lose'));
+    const pts = (info.path || []).map(centre).filter(Boolean);
+    if (pts.length >= 2) {
+      const d = pts.map((p) => `${p.x.toFixed(3)},${p.y.toFixed(3)}`).join(' ');
+      h('polyline', { points: d, class: 'win-line halo', pathLength: 1, 'pointer-events': 'none' }, svg);
+      h('polyline', { points: d, class: 'win-line', pathLength: 1, 'pointer-events': 'none' }, svg);
+      const a = pts[0], z = pts[pts.length - 1];
+      h('circle', { cx: a.x, cy: a.y, r: 0.2, class: 'win-end', 'pointer-events': 'none' }, svg);
+      h('circle', { cx: z.x, cy: z.y, r: 0.2, class: 'win-end', 'pointer-events': 'none' }, svg);
+    }
+  }
+
   function draw() {
     const res = def.result(s);
     def.render({ svg, s, ui, res, theme: theme() });
+    showWin(res);
     if (pending !== null) {
       const t = svg.querySelector(`[data-c="${pending}"]`);
       if (t) t.classList.add('pending');

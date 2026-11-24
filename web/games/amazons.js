@@ -55,6 +55,12 @@ export default {
     return canMove(s.b, s.turn + 1) ? null : { winner: 1 - s.turn };
   },
 
+  winInfo(s, res) {
+    const lose = [];
+    for (let i = 0; i < s.b.length; i++) if (s.b[i] === 2 - res.winner) lose.push(i);   // the loser's queens
+    return { lose };
+  },
+
   newUi() { return { from: -1, to: -1 }; },
   partial(ui) { return ui.from >= 0; },
   status(s, ui) {

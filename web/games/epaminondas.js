@@ -111,6 +111,12 @@ export default {
     return `${base} · back row ${w}–${bl}`;
   },
 
+  winInfo(s, res) {
+    const [W, H] = s.dims, cells = [], row = res.winner === 0 ? H - 1 : 0, v = res.winner + 1;
+    for (let x = 0; x < W; x++) if (s.b[row * W + x] === v) cells.push(row * W + x);
+    return cells.length ? { cells } : null;
+  },
+
   // The taps that produce a move (used by the smoke test): group ends, then the landing square.
   tapSequence(s, m) { return [...new Set([m[0], m[1]]), landing(s, m)]; },
 

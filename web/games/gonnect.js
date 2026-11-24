@@ -1,5 +1,6 @@
 // Gonnect: the capture rules of Go, but no passing; connect two opposite sides to win.
-import { place, keyOf, legalPoints, spans, drawGoBoard } from './goengine.js';
+import { place, keyOf, legalPoints, spans, drawGoBoard, nbrs } from './goengine.js';
+import { bfsPath } from './hexgeom.js';
 
 export default {
   name: 'gonnect',
@@ -36,6 +37,13 @@ export default {
     if (s.won >= 0) return { winner: s.won };
     if (s.moveCount && this.moves(s).length === 0) return { winner: 1 - s.turn };   // no legal move: you lose
     return null;
+  },
+
+  winInfo(s, res) {
+    const n = s.n, v = res.winner + 1, nb = nbrs(n), ok = (i) => s.b[i] === v;
+    const col = (x) => Array.from({ length: n }, (_, y) => y * n + x), row = (y) => Array.from({ length: n }, (_, x) => y * n + x);
+    const path = bfsPath(nb, col(0), ok, (i) => i % n === n - 1) || bfsPath(nb, row(0), ok, (i) => i >= n * (n - 1));
+    return path && { path };   // no chain: the win was by the opponent having no legal move
   },
 
   tap(s, ui, c) {

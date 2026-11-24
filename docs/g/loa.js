@@ -1,5 +1,5 @@
 // Lines of Action: slide pieces by the number of pieces on their line; join all of yours into one group.
-import { h } from './core.js?v=fece9af1';
+import { h } from './core.js?v=09554f26';
 
 const N = 8;
 const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
@@ -79,6 +79,12 @@ export default {
   result(s) {
     if (s.won >= 0) return { winner: s.won };
     return null;
+  },
+
+  winInfo(s, res) {
+    const cells = [];
+    for (let i = 0; i < s.b.length; i++) if (s.b[i] === res.winner + 1) cells.push(i);
+    return { cells };
   },
 
   newUi() { return { sel: -1 }; },

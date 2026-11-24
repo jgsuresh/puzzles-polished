@@ -26,3 +26,16 @@ export function boundsOf(cells, margin = 1.2) {
 
 // Neighbour offsets in axial (dq, dr) terms for the layout above.
 export const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]];
+
+// Shortest chain (as an ordered list of cells) from any source to a goal cell, moving only through
+// cells where ok(i) is true. Used to draw winning lines. Returns null when there is none.
+export function bfsPath(nb, sources, ok, goal) {
+  const prev = new Map(), q = [];
+  for (const i of sources) if (ok(i) && !prev.has(i)) { prev.set(i, -1); q.push(i); }
+  for (let k = 0; k < q.length; k++) {
+    const i = q[k];
+    if (goal(i)) { const path = []; for (let c = i; c !== -1; c = prev.get(c)) path.push(c); return path.reverse(); }
+    for (const j of nb[i]) if (!prev.has(j) && ok(j)) { prev.set(j, i); q.push(j); }
+  }
+  return null;
+}

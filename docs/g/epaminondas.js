@@ -1,6 +1,6 @@
 // Epaminondas (Robert Abbott): move phalanxes (lines of your stones) along their own line,
 // capture smaller enemy phalanxes, and get more stones onto the enemy back row than they have on yours.
-import { h } from './core.js?v=fece9af1';
+import { h } from './core.js?v=09554f26';
 
 // Eight directions as [dx, dy]; index i and i^1 are opposites. Row 0 is White's back row (bottom).
 const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [-1, 1], [1, -1]];
@@ -109,6 +109,12 @@ export default {
     const who = this.players[s.turn].name, [w, bl] = backRowCounts(s);
     const base = ui && ui.grp && ui.grp.length ? `${who}: choose where to move` : `${who}: pick a stone`;
     return `${base} · back row ${w}–${bl}`;
+  },
+
+  winInfo(s, res) {
+    const [W, H] = s.dims, cells = [], row = res.winner === 0 ? H - 1 : 0, v = res.winner + 1;
+    for (let x = 0; x < W; x++) if (s.b[row * W + x] === v) cells.push(row * W + x);
+    return cells.length ? { cells } : null;
   },
 
   // The taps that produce a move (used by the smoke test): group ends, then the landing square.

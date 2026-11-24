@@ -1,6 +1,6 @@
 // Havannah: win with a ring, a bridge (two corners) or a fork (three sides).
-import { h } from './core.js?v=fece9af1';
-import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=0ac8f1ce';
+import { h } from './core.js?v=09554f26';
+import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=ee2d6f74';
 
 const cache = new Map();
 function topo(side) {
@@ -99,6 +99,43 @@ export default {
   },
   status(s) {
     return s.note || '';
+  },
+
+  winInfo(s, res) {
+    const T = topo(s.n), v = res.winner + 1, b = s.b;
+    const seen = new Uint8Array(T.total);
+    for (let i = 0; i < T.total; i++) {
+      if (b[i] !== v || seen[i]) continue;
+      const comp = [i], st = [i];
+      seen[i] = 1;
+      let corners = 0, sides = 0;
+      while (st.length) {
+        const k = st.pop();
+        if (T.cornerId[k] >= 0) corners |= 1 << T.cornerId[k];
+        sides |= T.sideBit[k];
+        for (const j of T.nb[k]) if (!seen[j] && b[j] === v) { seen[j] = 1; st.push(j); comp.push(j); }
+      }
+      if (popcount(corners) >= 2 || popcount(sides) >= 3) return { cells: comp };
+    }
+    // Ring: the stones around a region that cannot reach the edge.
+    const seen2 = new Uint8Array(T.total);
+    for (let i = 0; i < T.total; i++) {
+      if (b[i] === v || seen2[i]) continue;
+      const region = [i], st = [i];
+      seen2[i] = 1;
+      let open = false;
+      while (st.length) {
+        const k = st.pop();
+        if (T.border[k]) open = true;
+        for (const j of T.nb[k]) if (!seen2[j] && b[j] !== v) { seen2[j] = 1; st.push(j); region.push(j); }
+      }
+      if (!open) {
+        const ring = new Set();
+        for (const k of region) for (const j of T.nb[k]) if (b[j] === v) ring.add(j);
+        return { cells: [...ring] };
+      }
+    }
+    return null;
   },
 
   tap(s, ui, c) { return s.b[+c] ? null : { move: +c }; },

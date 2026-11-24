@@ -343,3 +343,50 @@ test('jade: cross needs all four edges, parallel needs both colours across', () 
   s = jade.apply(s, [idx(5, H - 1), 2]);
   assert.equal(jade.result(s)?.winner, 1);
 });
+
+test('winInfo: every game describes its win with valid cells (random games that end in a win)', () => {
+  const sizeOf = (s) => (s.b || s.blocked).length;
+  let checked = 0;
+  for (const [name, def] of Object.entries(ALL)) {
+    if (!def.winInfo) continue;
+    for (let g = 0; g < 30; g++) {
+      let s = def.init(Object.fromEntries((def.options || []).map((o) => [o.id, o.def])));
+      let guard = 0, res;
+      while (!(res = def.result(s)) && guard++ < 1500) {
+        const ms = def.moves(s);
+        s = def.apply(s, ms[Math.floor(Math.random() * ms.length)]);
+      }
+      if (!res || res.winner < 0) continue;
+      const info = def.winInfo(s, res);
+      if (!info) continue;
+      for (const key of ['path', 'cells', 'lose']) {
+        for (const c of info[key] || []) assert.ok(Number.isInteger(c) && c >= 0 && c < sizeOf(s), `${name}: bad cell ${c} in ${key}`);
+      }
+      checked++;
+    }
+  }
+  assert.ok(checked > 10, `only ${checked} win infos exercised`);
+});
+
+test('winInfo: exact winning lines', () => {
+  // Hex: the chain runs top to bottom through adjacent stones.
+  const n = 7;
+  let s = hex.init({ n, swap: 0 });
+  for (let r = 0; r < n; r++) { s = hex.apply(s, r * n + 3); if (r < n - 1) s = hex.apply(s, r * n); }
+  const hp = hex.winInfo(s, hex.result(s)).path;
+  assert.equal(hp.length, n);
+  assert.ok(hp[0] < n && hp[hp.length - 1] >= n * (n - 1));
+  // Gomoku: exactly the run of stones is returned, in order.
+  let g = gomoku.init({ n: 15 });
+  for (let i = 0; i < 5; i++) { g = gomoku.apply(g, 7 * 15 + 3 + i); if (i < 4) g = gomoku.apply(g, 14 * 15 + i); }
+  assert.deepEqual(gomoku.winInfo(g, gomoku.result(g)).path, [0, 1, 2, 3, 4].map((i) => 7 * 15 + 3 + i));
+  // Slimetrail: the trail starts at the centre and ends in a goal.
+  let t = slimetrail.init({ n: 7 });
+  let guard = 0;
+  while (!slimetrail.result(t) && guard++ < 100) { const m = slimetrail.moves(t); t = slimetrail.apply(t, m[0]); }
+  const r = slimetrail.result(t);
+  if (r.winner >= 0) { const tr = slimetrail.winInfo(t, r).path; assert.equal(tr[0], 24); assert.ok([6, 42].includes(tr[tr.length - 1])); }
+  // Amazons: the loser's queens are marked.
+  const b = new Uint8Array(100); b[0] = 2; b[1] = 3; b[10] = 3; b[11] = 3; b[99] = 1;
+  assert.deepEqual(amazons.winInfo({ b, turn: 1 }, { winner: 0 }).lose, [0]);
+});

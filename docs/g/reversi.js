@@ -1,5 +1,5 @@
 // Reversi (Othello): sandwich the other colour's discs to flip them; most discs wins.
-import { h } from './core.js?v=fece9af1';
+import { h } from './core.js?v=09554f26';
 
 const N = 8;
 const DIRS8 = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
@@ -49,6 +49,12 @@ export default {
   },
   status(s) {
     return `${this.players[s.turn].name} to move · ${count(s.b, 1)}–${count(s.b, 2)}`;
+  },
+
+  winInfo(s, res) {
+    const cells = [];
+    for (let i = 0; i < s.b.length; i++) if (s.b[i] === res.winner + 1) cells.push(i);
+    return { cells };
   },
 
   tap(s, ui, c) { return flipsFor(s.b, +c, s.turn + 1).length ? { move: +c } : null; },

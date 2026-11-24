@@ -1,5 +1,5 @@
 // Gomoku: first to get five (or more) in a row, horizontally, vertically or diagonally.
-import { h } from './core.js?v=fece9af1';
+import { h } from './core.js?v=09554f26';
 
 const D4 = [[1, 0], [0, 1], [1, 1], [1, -1]];
 
@@ -43,6 +43,18 @@ export default {
     if (s.won) return { winner: 1 - s.turn };
     return s.count === s.b.length ? { winner: -1 } : null;
   },
+  winInfo(s, res) {
+    if (!s.won) return null;
+    const n = s.n, v = res.winner + 1, x0 = s.last % n, y0 = (s.last / n) | 0;
+    for (const [dx, dy] of D4) {
+      const cells = [s.last];
+      for (let k = 1; ; k++) { const x = x0 - dx * k, y = y0 - dy * k; if (x < 0 || y < 0 || x >= n || y >= n || s.b[y * n + x] !== v) break; cells.unshift(y * n + x); }
+      for (let k = 1; ; k++) { const x = x0 + dx * k, y = y0 + dy * k; if (x < 0 || y < 0 || x >= n || y >= n || s.b[y * n + x] !== v) break; cells.push(y * n + x); }
+      if (cells.length >= 5) return { path: cells };
+    }
+    return null;
+  },
+
   tap(s, ui, c) { return s.b[+c] ? null : { move: +c }; },
   render({ svg, s, res }) {
     const n = s.n, pad = 1.2;

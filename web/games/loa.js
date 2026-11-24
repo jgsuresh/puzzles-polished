@@ -81,6 +81,12 @@ export default {
     return null;
   },
 
+  winInfo(s, res) {
+    const cells = [];
+    for (let i = 0; i < s.b.length; i++) if (s.b[i] === res.winner + 1) cells.push(i);
+    return { cells };
+  },
+
   newUi() { return { sel: -1 }; },
   partial(ui) { return ui.sel >= 0; },
   status(s, ui) {

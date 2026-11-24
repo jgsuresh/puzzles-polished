@@ -1,6 +1,6 @@
 // Campaign (Chris Huntoon): each player has one chess Knight. Each move the Knight jumps to an empty
 // square and leaves a marker of your colour behind. First to line up five markers wins; a stranded Knight loses.
-import { h } from './core.js?v=fece9af1';
+import { h } from './core.js?v=09554f26';
 
 const KN = [[1, 2], [2, 1], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]];
 const LINES = [[1, 0], [0, 1], [1, 1], [1, -1]];
@@ -65,6 +65,23 @@ export default {
   status(s) {
     const who = this.players[s.turn].name;
     return s.moveCount < 2 ? `${who}: place your Knight anywhere` : `${who}: move your Knight`;
+  },
+
+  winInfo(s, res) {
+    const n = s.n, v = res.winner + 1;
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      if (s.b[y * n + x] !== v) continue;
+      for (const [dx, dy] of LINES) {
+        const cells = [];
+        for (let k = 0; k < 5; k++) {
+          const xx = x + dx * k, yy = y + dy * k;
+          if (xx < 0 || yy < 0 || xx >= n || yy >= n || s.b[yy * n + xx] !== v) break;
+          cells.push(yy * n + xx);
+        }
+        if (cells.length === 5) return { path: cells };
+      }
+    }
+    return null;
   },
 
   tap(s, ui, c) {

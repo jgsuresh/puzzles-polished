@@ -1,8 +1,8 @@
 // Jade (Mark Thompson): on a hex board either player may drop a white OR a black stone each turn.
 // Cross wins with one group (either colour) touching all four edges.
 // Parallel wins by joining the same pair of opposite edges with a white chain AND a black chain.
-import { h } from './core.js?v=fece9af1';
-import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=0ac8f1ce';
+import { h } from './core.js?v=09554f26';
+import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=ee2d6f74';
 
 const cache = new Map();
 function topo(W, H) {
@@ -27,7 +27,7 @@ function groupEdges(b, W, H, v) {
   for (let i = 0; i < b.length; i++) {
     if (b[i] !== v || seen[i]) continue;
     let m = 0;
-    const st = [i];
+    const st = [i], cells = [i];
     seen[i] = 1;
     while (st.length) {
       const k = st.pop(), x = k % W, y = (k / W) | 0;
@@ -35,19 +35,20 @@ function groupEdges(b, W, H, v) {
       if (y === H - 1) m |= 2;
       if (x === 0) m |= 4;
       if (x === W - 1) m |= 8;
-      for (const j of nb[k]) if (!seen[j] && b[j] === v) { seen[j] = 1; st.push(j); }
+      for (const j of nb[k]) if (!seen[j] && b[j] === v) { seen[j] = 1; st.push(j); cells.push(j); }
     }
-    res.push(m);
+    res.push({ m, cells });
   }
   return res;
 }
 
 // Returns {cross, parallel} booleans for the position.
-export function judge(b, W, H) {
+export function judge(b, W, H, wantCells) {
   const white = groupEdges(b, W, H, 1), black = groupEdges(b, W, H, 2);
-  const cross = white.some((m) => m === 15) || black.some((m) => m === 15);
-  const joins = (list, bits) => list.some((m) => (m & bits) === bits);
+  const cross = white.some((g) => g.m === 15) || black.some((g) => g.m === 15);
+  const joins = (list, bits) => list.some((g) => (g.m & bits) === bits);
   const parallel = (joins(white, 3) && joins(black, 3)) || (joins(white, 12) && joins(black, 12));
+  if (wantCells) return { cross, parallel, white, black };
   return { cross, parallel };
 }
 
@@ -84,6 +85,16 @@ export default {
     if (s.won >= 0) return { winner: s.won };
     if (!s.b.includes(0)) return { winner: -1 };
     return null;
+  },
+
+  winInfo(s, res) {
+    const j = judge(s.b, s.W, s.H, true), cells = [];
+    const pick = (list, bits) => list.filter((g) => (g.m & bits) === bits).forEach((g) => cells.push(...g.cells));
+    // Cross's group, or Parallel's two chains; if both goals are met show the mover's.
+    const crossFirst = j.cross && (!j.parallel || res.winner === 0);
+    if (crossFirst) { pick(j.white, 15); pick(j.black, 15); }
+    else { pick(j.white, 3); pick(j.black, 3); pick(j.white, 12); pick(j.black, 12); }
+    return cells.length ? { cells: [...new Set(cells)] } : null;
   },
 
   newUi() { return { cell: -1, col: 1 }; },

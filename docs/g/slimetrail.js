@@ -1,7 +1,7 @@
 // Slimetrail (Bill Taylor): a single shared token crawls over a hex rhombus, blocking every cell it leaves.
 // The player whose goal corner the token enters wins, whoever moved it there.
-import { h } from './core.js?v=fece9af1';
-import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=0ac8f1ce';
+import { h } from './core.js?v=09554f26';
+import { hexXY, hexVerts, pts, boundsOf, DIRS } from './hexgeom.js?v=ee2d6f74';
 
 const cache = new Map();
 function topo(n) {
@@ -54,7 +54,7 @@ export default {
   init({ n }) {
     n = +n;
     const mid = (n - 1) / 2;
-    return { n, blocked: new Uint8Array(n * n), pos: mid * n + mid, turn: 0, last: -1, won: -1 };
+    return { n, blocked: new Uint8Array(n * n), pos: mid * n + mid, turn: 0, last: -1, won: -1, trail: [mid * n + mid] };
   },
   moves(s) { return legal(s); },
   apply(s, j) {
@@ -62,7 +62,7 @@ export default {
     blocked[s.pos] = 1;
     const { goals } = topo(s.n);
     const won = j === goals[0] ? 0 : j === goals[1] ? 1 : -1;
-    return { ...s, blocked, pos: j, last: s.pos, turn: 1 - s.turn, won };
+    return { ...s, blocked, pos: j, last: s.pos, turn: 1 - s.turn, won, trail: [...s.trail, j] };
   },
   result(s) {
     if (s.won >= 0) return { winner: s.won };
@@ -71,6 +71,10 @@ export default {
   },
   status(s) {
     return `${this.players[s.turn].name} to move the slime`;
+  },
+
+  winInfo(s, res) {
+    return s.won >= 0 ? { path: s.trail } : null;
   },
 
   tap(s, ui, c) { return legal(s).includes(+c) ? { move: +c } : null; },
