@@ -47,7 +47,7 @@ for (const d of ['p', 'css', 'js', 'thumbs']) mkdirSync(join(out, d), { recursiv
 
 copyFileSync(join(web, 'icon.svg'), join(out, 'icon.svg'));
 copyFileSync(join(web, 'css/app.css'), join(out, 'css/app.css'));
-for (const f of ['puzzle-ui.js', 'home.js']) copyFileSync(join(web, 'js', f), join(out, 'js', f));
+for (const f of ['puzzle-ui.js', 'skins.js', 'home.js']) copyFileSync(join(web, 'js', f), join(out, 'js', f));
 if (existsSync(join(web, 'thumbs'))) {
   for (const f of readdirSync(join(web, 'thumbs'))) if (f.endsWith('.png')) copyFileSync(join(web, 'thumbs', f), join(out, 'thumbs', f));
 }

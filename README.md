@@ -57,6 +57,21 @@ Upstream's glue expects certain element IDs (`#new`, `#undo`, `#gametype`, `#puz
 
 Dark mode inverts the canvas with a hue-preserving CSS filter, because the engines hard-code black ink on a light palette.
 
+## Skins (deeper redesign, in progress)
+
+Beyond the palette, individual games can be *re-skinned*. The patched glue offers every drawing primitive the engine emits (`rect`, `line`, `poly`, `circle`, `text`) to a per-game skin first; a skin returns `true` if it drew the call itself. Engines identify colours by semantic index (`COL_MINE`, `COL_HIGHLIGHT`…), so a skin knows *what* it is drawing. Skins can also override individual palette slots. They live in [`web/js/skins.js`](web/js/skins.js); add `?skin=off` to a puzzle URL to compare with stock drawing.
+
+| Skinned | What changed |
+|---|---|
+| Mines | raised, rounded tiles with soft shadows; recessed opened cells; redrawn bomb and flag; slimmer board margin (small C patch) |
+| Net | rounded endpoint boxes, slate wires with a glowing power core |
+| Solo | bold givens vs indigo player entries, faint cell lines with strong box borders, soft rounded selection |
+| Loopy | indigo round-capped loop ribbons, softer dots, bold clues |
+
+Where the JS layer can't reach (layout constants, margins), `scripts/patch-glue.mjs` also carries small asserted patches to the engines' C source, applied to the pinned upstream commit before compiling.
+
+Known limit: dark mode is a CSS inversion of the light rendering, so depth cues (e.g. raised vs. recessed tiles in Mines) flip. Giving skins their own dark palettes is the natural next step.
+
 ## Adding or tweaking a puzzle's touch controls
 
 Edit [`scripts/puzzles-meta.mjs`](scripts/puzzles-meta.mjs): `modes` picks which click buttons appear in the tap-mode switch (`[]` hides it), `keypad` is `digits`, `dpad` or `undead`, and `pencil` adds a pencil-mark key.

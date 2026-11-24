@@ -36,6 +36,12 @@
     return '#' + f(0) + f(8) + f(4);
   }
   window.stgRecolour = function (index, colour) {
+    var out = baseRecolour(index, colour);
+    // A skin may then override individual palette slots outright.
+    var sk = window.stgSkin;
+    return sk && sk.palette ? (sk.palette(index, out) || out) : out;
+  };
+  function baseRecolour(index, colour) {
     if (index === 0) return colour;
     var m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(colour);
     if (!m) return colour;
@@ -48,7 +54,7 @@
     else if (h >= 170 && h < 200) { l2 = l * 0.88; }                       // cyan -> teal
     else if (h >= 200 && h < 265) { h2 = h + 8; }                          // blue -> indigo-ish
     return hsl2hex(h2, s2, l2);
-  };
+  }
 
   /* ---------- Toasts ---------- */
   function toast(text, cls) {

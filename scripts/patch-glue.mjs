@@ -15,7 +15,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const up = join(root, '.upstream');
 
 // Start from pristine upstream so the script is idempotent.
-execFileSync('git', ['-C', up, 'checkout', '--', 'emccpre.js', 'emcclib.js'], { stdio: 'inherit' });
+const PATCHED_FILES = ['emccpre.js', 'emcclib.js', 'mines.c'];
+execFileSync('git', ['-C', up, 'checkout', '--', ...PATCHED_FILES], { stdio: 'inherit' });
 
 function patch(file, edits) {
   const path = join(up, file);
@@ -62,6 +63,43 @@ patch('emcclib.js', [
     from: 'alert(UTF8ToString(ptr));',
     to: 'var msg = UTF8ToString(ptr); if (window.stgError) window.stgError(msg); else alert(msg);',
   },
+  // ---- Skin hooks: a per-game skin (window.stgSkin) may take over any
+  // drawing primitive by returning true. Skins draw on the global `ctx`.
+  {
+    name: 'skin: rect',
+    from: 'js_canvas_draw_rect: function(dr, x, y, w, h, colour) {',
+    to: 'js_canvas_draw_rect: function(dr, x, y, w, h, colour) {\n        if (window.stgSkin && window.stgSkin.rect && window.stgSkin.rect(x, y, w, h, colour)) return;',
+  },
+  {
+    name: 'skin: line',
+    from: 'js_canvas_draw_line: function(x1, y1, x2, y2, width, colour) {',
+    to: 'js_canvas_draw_line: function(x1, y1, x2, y2, width, colour) {\n        if (window.stgSkin && window.stgSkin.line && window.stgSkin.line(x1, y1, x2, y2, width, colour)) return;',
+  },
+  {
+    name: 'skin: poly',
+    from: 'js_canvas_draw_poly: function(dr, pointptr, npoints, fill, outline) {',
+    to: `js_canvas_draw_poly: function(dr, pointptr, npoints, fill, outline) {
+        if (window.stgSkin && window.stgSkin.poly) {
+            var pts = [];
+            for (var pi = 0; pi < 2 * npoints; pi++) pts.push(getValue(pointptr + 4 * pi, 'i32'));
+            if (window.stgSkin.poly(pts, fill, outline)) return;
+        }`,
+  },
+  {
+    name: 'skin: circle',
+    from: 'js_canvas_draw_circle: function(dr, x, y, r, fill, outline) {',
+    to: 'js_canvas_draw_circle: function(dr, x, y, r, fill, outline) {\n        if (window.stgSkin && window.stgSkin.circle && window.stgSkin.circle(x, y, r, fill, outline)) return;',
+  },
+  {
+    name: 'skin: text',
+    from: `text) {
+        canvas_set_font(ctx, fontsize, monospaced);`,
+    to: `text) {
+        if (window.stgSkin && window.stgSkin.text &&
+            window.stgSkin.text(x, y, halign, colour, fontsize, monospaced, UTF8ToString(text))) return;
+        canvas_set_font(ctx, fontsize, monospaced);`,
+  },
+
   {
     // Lets the UI layer restyle every colour a puzzle announces.
     name: 'recolour hook',
@@ -70,4 +108,15 @@ patch('emcclib.js', [
   },
 ]);
 
-console.log('Patched upstream glue.');
+// ---- Engine (C) patches: layout tweaks that no amount of JS can do ----
+patch('mines.c', [
+  {
+    // Upstream reserves a fat 1.5-tile margin around the board for the 3D rim.
+    // Our skin has no rim, and on a phone that margin wastes a third of the screen.
+    name: 'mines: slim border',
+    from: '#define BORDER max(TILE_SIZE * 3 / 2, ARROW_DIST+ARROW_HEAD_WIDTH + 2)',
+    to: '#define BORDER (IS_CYCLIC(ds->grid->type) ? ARROW_DIST+ARROW_HEAD_WIDTH + 4 : TILE_SIZE / 2)',
+  },
+]);
+
+console.log('Patched upstream glue and engines.');
