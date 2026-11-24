@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Puzzles — a prettier take on Simon Tatham's collection</title>
+<meta name="description" content="40 classic logic puzzles, redesigned: responsive, touch-friendly, dark mode. Powered by Simon Tatham's original puzzle engines.">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('stg-theme'); } catch (e) {}
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="page-home">
+
+<header class="hero">
+  <div class="top">
+    <button type="button" class="icon-btn" id="theme-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+  </div>
+  <h1>Puzzles, <em>polished.</em></h1>
+  <p>40 classic logic puzzles from Simon Tatham's Portable Puzzle Collection, with a fresh coat of paint. Works on your phone, tablet or desktop.</p>
+</header>
+
+<div class="controls">
+  <div class="inner">
+    <input class="search" id="search" type="search" placeholder="Search puzzles…" aria-label="Search puzzles" autocomplete="off">
+    <div class="filters" id="filters" role="group" aria-label="Filter by type"></div>
+  </div>
+</div>
+
+<main class="grid" id="grid"></main>
+
+<footer class="site">
+  Puzzle engines © Simon Tatham and contributors (MIT).
+  Original collection: <a href="https://www.chiark.greenend.org.uk/~sgtatham/puzzles/">chiark.greenend.org.uk/~sgtatham/puzzles</a>.
+</footer>
+
+<script>window.PUZZLES = [{"name":"blackbox","title":"Black Box","description":"Ball-finding puzzle","objective":"Find the hidden balls in the box by bouncing laser beams off them.","category":"logic"},{"name":"bridges","title":"Bridges","description":"Bridge-placing puzzle","objective":"Connect all the islands with a network of bridges.","category":"loops"},{"name":"cube","title":"Cube","description":"Rolling cube puzzle","objective":"Pick up all the blue squares by rolling the cube over them.","category":"action"},{"name":"dominosa","title":"Dominosa","description":"Domino tiling puzzle","objective":"Tile the rectangle with a full set of dominoes.","category":"numbers"},{"name":"fifteen","title":"Fifteen","description":"Sliding block puzzle","objective":"Slide the tiles around to arrange them into order.","category":"action"},{"name":"filling","title":"Filling","description":"Polyomino puzzle","objective":"Mark every square with the area of its containing region.","category":"numbers"},{"name":"flip","title":"Flip","description":"Tile inversion puzzle","objective":"Flip groups of squares to light them all up at once.","category":"action"},{"name":"flood","title":"Flood","description":"Flood-filling puzzle","objective":"Turn the grid the same colour in as few flood fills as possible.","category":"action"},{"name":"galaxies","title":"Galaxies","description":"Symmetric polyomino puzzle","objective":"Divide the grid into rotationally symmetric regions each centred on a dot.","category":"regions"},{"name":"guess","title":"Guess","description":"Combination-guessing puzzle","objective":"Guess the hidden combination of colours.","category":"logic"},{"name":"inertia","title":"Inertia","description":"Gem-collecting puzzle","objective":"Collect all the gems without running into any of the mines.","category":"action"},{"name":"keen","title":"Keen","description":"Arithmetic Latin square puzzle","objective":"Complete the latin square in accordance with the arithmetic clues.","category":"numbers"},{"name":"lightup","title":"Light Up","description":"Light-bulb placing puzzle","objective":"Place bulbs to light up all the squares.","category":"logic"},{"name":"loopy","title":"Loopy","description":"Loop-drawing puzzle","objective":"Draw a single closed loop, given clues about number of adjacent edges.","category":"loops"},{"name":"magnets","title":"Magnets","description":"Magnet-placing puzzle","objective":"Place magnets to satisfy the clues and avoid like poles touching.","category":"logic"},{"name":"map","title":"Map","description":"Map-colouring puzzle","objective":"Colour the map so that adjacent regions are never the same colour.","category":"regions"},{"name":"mines","title":"Mines","description":"Mine-finding puzzle","objective":"Find all the mines without treading on any of them.","category":"logic"},{"name":"mosaic","title":"Mosaic","description":"Grid-filling puzzle","objective":"Fill in the grid given clues about number of nearby black squares.","category":"logic"},{"name":"net","title":"Net","description":"Network jigsaw puzzle","objective":"Rotate each tile to reassemble the network.","category":"loops"},{"name":"netslide","title":"Netslide","description":"Toroidal sliding network puzzle","objective":"Slide a row at a time to reassemble the network.","category":"action"},{"name":"palisade","title":"Palisade","description":"Grid-division puzzle","objective":"Divide the grid into equal-sized areas in accordance with the clues.","category":"regions"},{"name":"pattern","title":"Pattern","description":"Pattern puzzle","objective":"Fill in the pattern in the grid, given only the lengths of runs of black squares.","category":"logic"},{"name":"pearl","title":"Pearl","description":"Loop-drawing puzzle","objective":"Draw a single closed loop, given clues about corner and straight squares.","category":"loops"},{"name":"pegs","title":"Pegs","description":"Peg solitaire puzzle","objective":"Jump pegs over each other to remove all but one.","category":"action"},{"name":"range","title":"Range","description":"Visible-distance puzzle","objective":"Place black squares to limit the visible distance from each numbered cell.","category":"numbers"},{"name":"rect","title":"Rectangles","description":"Rectangles puzzle","objective":"Divide the grid into rectangles with areas equal to the numbers.","category":"regions"},{"name":"samegame","title":"Same Game","description":"Block-clearing puzzle","objective":"Clear the grid by removing touching groups of the same colour squares.","category":"action"},{"name":"signpost","title":"Signpost","description":"Square-connecting puzzle","objective":"Connect the squares into a path following the arrows.","category":"loops"},{"name":"singles","title":"Singles","description":"Number-removing puzzle","objective":"Black out the right set of duplicate numbers.","category":"numbers"},{"name":"sixteen","title":"Sixteen","description":"Toroidal sliding block puzzle","objective":"Slide a row at a time to arrange the tiles into order.","category":"action"},{"name":"slant","title":"Slant","description":"Maze-drawing puzzle","objective":"Draw a maze of slanting lines that matches the clues.","category":"loops"},{"name":"solo","title":"Solo","description":"Number placement puzzle","objective":"Fill in the grid so that each row, column and square block contains one of every digit.","category":"numbers"},{"name":"tents","title":"Tents","description":"Tent-placing puzzle","objective":"Place a tent next to each tree.","category":"logic"},{"name":"towers","title":"Towers","description":"Tower-placing Latin square puzzle","objective":"Complete the latin square of towers in accordance with the clues.","category":"numbers"},{"name":"tracks","title":"Tracks","description":"Path-finding railway track puzzle","objective":"Fill in the railway track according to the clues.","category":"loops"},{"name":"twiddle","title":"Twiddle","description":"Rotational sliding block puzzle","objective":"Rotate the tiles around themselves to arrange them into order.","category":"action"},{"name":"undead","title":"Undead","description":"Monster-placing puzzle","objective":"Place ghosts, vampires and zombies so that the right numbers of them can be seen in mirrors.","category":"logic"},{"name":"unequal","title":"Unequal","description":"Latin square puzzle","objective":"Complete the latin square in accordance with the > signs.","category":"numbers"},{"name":"unruly","title":"Unruly","description":"Black and white grid puzzle","objective":"Fill in the black and white grid to avoid runs of three.","category":"logic"},{"name":"untangle","title":"Untangle","description":"Planar graph layout puzzle","objective":"Reposition the points so that the lines do not cross.","category":"action"}]; window.CATEGORIES = [{"id":"numbers","label":"Numbers"},{"id":"logic","label":"Grid logic"},{"id":"loops","label":"Loops & paths"},{"id":"regions","label":"Regions"},{"id":"action","label":"Action & sliding"}];</script>
+<script src="js/home.js"></script>
+</body>
+</html>

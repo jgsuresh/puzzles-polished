@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Puzzles — a prettier take on Simon Tatham's collection</title>
+<meta name="description" content="40 classic logic puzzles, redesigned: responsive, touch-friendly, dark mode. Powered by Simon Tatham's original puzzle engines.">
+<meta name="theme-color" content="#f4f1ea">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('stg-theme'); } catch (e) {}
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body class="page-home">
+
+<header class="hero">
+  <div class="top">
+    <button type="button" class="icon-btn" id="theme-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg class="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+  </div>
+  <h1>Puzzles, <em>polished.</em></h1>
+  <p>{{COUNT}} classic logic puzzles from Simon Tatham's Portable Puzzle Collection, with a fresh coat of paint. Works on your phone, tablet or desktop.</p>
+</header>
+
+<div class="controls">
+  <div class="inner">
+    <input class="search" id="search" type="search" placeholder="Search puzzles…" aria-label="Search puzzles" autocomplete="off">
+    <div class="filters" id="filters" role="group" aria-label="Filter by type"></div>
+  </div>
+</div>
+
+<main class="grid" id="grid"></main>
+
+<footer class="site">
+  Puzzle engines © Simon Tatham and contributors (MIT).
+  Original collection: <a href="https://www.chiark.greenend.org.uk/~sgtatham/puzzles/">chiark.greenend.org.uk/~sgtatham/puzzles</a>.
+</footer>
+
+<script>window.PUZZLES = {{DATA}}; window.CATEGORIES = {{CATEGORIES}};</script>
+<script src="js/home.js"></script>
+</body>
+</html>

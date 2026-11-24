@@ -1,0 +1,17 @@
+{
+  "name": "puzzles-polished",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A responsive, modern front-end for Simon Tatham's Portable Puzzle Collection.",
+  "license": "MIT",
+  "scripts": {
+    "build": "bash scripts/build.sh",
+    "site": "node scripts/build-site.mjs",
+    "serve": "node scripts/serve.mjs",
+    "thumbs": "node scripts/thumbs.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}
