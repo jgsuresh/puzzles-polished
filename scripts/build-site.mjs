@@ -62,7 +62,7 @@ const tpl = readFileSync(join(web, 'puzzle.html'), 'utf8');
 for (const p of puzzles) {
   copyFileSync(join(buildDir, `${p.name}.js`), join(out, 'p', `${p.name}.js`));
   copyFileSync(join(buildDir, `${p.name}.wasm`), join(out, 'p', `${p.name}.wasm`));
-  const config = { name: p.name, modes: p.meta.modes ?? ['left', 'right'], keypad: p.meta.keypad ?? null, pencil: !!p.meta.pencil };
+  const config = { name: p.name, modes: p.meta.modes ?? ['left', 'right'], keypad: p.meta.keypad ?? null, pencil: !!p.meta.pencil, digitColours: !!p.meta.digitColours };
   const html = tpl
     .replaceAll('{{TITLE}}', escText(p.title))
     .replaceAll('{{NAME}}', p.name)

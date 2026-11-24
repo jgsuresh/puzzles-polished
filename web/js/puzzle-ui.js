@@ -159,6 +159,8 @@
   $('#help-close').addEventListener('click', function () { help.close(); });
   help.addEventListener('click', function (e) { if (e.target === help) help.close(); });
 
+  try { window.stgDigitColours = localStorage.getItem('stg-digit-colours') === '1'; } catch (e) { window.stgDigitColours = false; }
+
   /* ---------- Once the puzzle is up ---------- */
   window.stgOnReady = function () {
     // #puzzle is laid out (so the engine can measure its container) but
@@ -195,11 +197,15 @@
       return canvas_mouse_coords(e, canvas); // from upstream glue (patched to use client coords)
     }
     canvas.addEventListener('pointerdown', function (e) {
-      if (e.pointerType === 'mouse' || !api.mousedown) return;
+      if (!api.mousedown) return;
+      // A real mouse is left to upstream, except left-click in Pencil mode (acts as right-click).
+      var penModes = CFG.modes && CFG.modes.indexOf('pen') >= 0;
+      if (e.pointerType === 'mouse' && !(penModes && e.button === 0 && tapButton !== 0)) return;
       e.preventDefault(); // suppresses the synthesised mouse events
       if (activeTouch !== null) return;
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* synthetic pointer */ }
       var p = coords(e);
+      canvas.focus({ preventScroll: true }); // preventDefault above also skips upstream's focus-on-mousedown
       activeTouch = { id: e.pointerId, button: tapButton };
       api.mousedown(p.x, p.y, tapButton);
     });
@@ -213,15 +219,25 @@
       var p = coords(e);
       api.mouseup(p.x, p.y, activeTouch.button);
       activeTouch = null;
+      if (e.type === 'pointerup' && e.pointerType !== 'mouse') eraseAfterTap();
     }
     canvas.addEventListener('pointerup', endTouch);
     canvas.addEventListener('pointercancel', endTouch);
 
-    /* ---- Touch aids ---- */
+    /* ---- Input modes ----
+       Digit games get Pen / Pencil / Erase on every device; other games get the
+       left/right/middle switch on touch screens only. */
     var aids = $('#aids');
     var modes = CFG.modes || ['left', 'right'];
-    if (coarse && modes.length > 1) {
-      var LABELS = { left: 'Left click', right: 'Right click', middle: 'Middle click' };
+    var smart = modes.indexOf('pen') >= 0;
+    var eraseMode = false;
+    var top = document.createElement('div');
+    top.className = 'aids-top';
+    aids.insertBefore(top, aids.firstChild);
+    top.appendChild($('#tapmodes'));
+    if ((coarse || smart) && modes.length > 1) {
+      var LABELS = { left: 'Left click', right: 'Right click', middle: 'Middle click', pen: 'Pen', pencil: 'Pencil', erase: 'Erase' };
+      var BTN = { left: 0, middle: 1, right: 2, pen: 0, pencil: 2, erase: 0 };
       var wrap = $('#tapmodes');
       modes.forEach(function (m, i) {
         var b = document.createElement('button');
@@ -229,8 +245,10 @@
         b.setAttribute('role', 'radio');
         b.setAttribute('aria-checked', String(i === 0));
         b.textContent = LABELS[m];
+        b.addEventListener('pointerdown', function (e) { e.preventDefault(); }); // keep board focus
         b.addEventListener('click', function () {
-          tapButton = BUTTONS[m];
+          tapButton = BTN[m];
+          eraseMode = m === 'erase';
           $$('button', wrap).forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });
         });
         wrap.appendChild(b);
@@ -238,6 +256,25 @@
       wrap.hidden = false;
       aids.hidden = false;
     }
+    if (CFG.digitColours) {
+      var cb = document.createElement('button');
+      cb.type = 'button';
+      cb.className = 'aidtoggle';
+      cb.innerHTML = '<span class="swatches" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Colour digits';
+      cb.setAttribute('aria-pressed', String(!!window.stgDigitColours));
+      cb.addEventListener('pointerdown', function (e) { e.preventDefault(); });
+      cb.addEventListener('click', function () {
+        window.stgDigitColours = !window.stgDigitColours;
+        try { localStorage.setItem('stg-digit-colours', window.stgDigitColours ? '1' : '0'); } catch (e) {}
+        cb.setAttribute('aria-pressed', String(window.stgDigitColours));
+        if (window.stgRefresh) window.stgRefresh();
+      });
+      top.appendChild(cb);
+      aids.hidden = false;
+    }
+    // Erase mode: tapping a cell selects it, then we clear it.
+    function eraseAfterTap() { if (eraseMode) setTimeout(function () { sendKey('Backspace'); }, 0); }
+    canvas.addEventListener('mouseup', function (e) { if (e.button === 0) eraseAfterTap(); });
 
     function sendKey(key) {
       if (!api.key) return;
@@ -265,7 +302,7 @@
         var digitBtns = [];
         for (var d = 1; d <= 9; d++) digitBtns.push(keyButton(pad, String(d), String(d), 'digit'));
         var gap = document.createElement('span'); gap.className = 'gap'; pad.appendChild(gap);
-        if (CFG.pencil) keyButton(pad, '✎ Pencil', 'm', '', 'Toggle pencil marks');
+        if (CFG.pencil && !smart) keyButton(pad, '✎ Pencil', 'm', '', 'Toggle pencil marks');
         keyButton(pad, '⌫', 'Backspace', '', 'Clear cell');
         // Only offer the digits the current grid size uses.
         var sync = function () {

@@ -9,6 +9,7 @@ The puzzle **engines are the original C code**, compiled to WebAssembly, so gene
 | Layout | fixed-size page, tiny menu | fills any screen; resizes live (rotate your phone!) |
 | Menus | hover-only drop-downs | tap-friendly menus + a bottom control dock |
 | Touch | taps only; no right-click, no keyboard, no drags | real touch drags, a **tap-mode switch** (left / right / middle click) and an **on-screen keypad** (digits, pencil marks, D-pad) |
+| Digit games | one click mode, pencil via right-click or `M` | **Pen / Pencil / Erase** mode bar on every device and a **Colour digits** toggle (Solo, Keen, Towers, Unequal, Filling) |
 | Look | grey page, harsh palette | warm paper theme, softened puzzle palette, rounded canvas, **dark mode** |
 | Home | plain list of links | searchable, filterable gallery with live thumbnails |
 | Feedback | `COMPLETED!` in the status bar | confetti + toast when you solve one, in-page how-to-play dialog, link copying |

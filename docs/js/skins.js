@@ -835,5 +835,26 @@
 
   /* ---------- activate ---------- */
   var name = (window.STG || {}).name;
+  /* "Colour digits": every digit gets its own hue (toggle in the aids bar). The
+     golden-angle step keeps neighbouring digits far apart on the wheel. Errors stay red. */
+  var ERROR_INDEX = { solo: 6, keen: 4, towers: 4, unequal: 4, filling: 4 };
+  function digitColour(ch) {
+    var i = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(ch.toUpperCase());
+    var dark = document.documentElement.dataset.theme === 'dark';
+    return 'hsl(' + Math.round((i * 137.508 + 8) % 360) + ',' + (dark ? 78 : 72) + '%,' + (dark ? 68 : 40) + '%)';
+  }
+  Object.keys(ERROR_INDEX).forEach(function (n) {
+    var skin = SKINS[n];
+    if (!skin) return;
+    var base = skin.text;
+    skin.text = function (x, y, halign, colour, size, mono, txt) {
+      if (window.stgDigitColours && colour !== ERROR_INDEX[n] && /^[1-9A-Za-z]$/.test(txt)) {
+        drawText(x, y, halign, digitColour(txt), size, 800, txt);
+        return true;
+      }
+      return base ? base.apply(this, arguments) : false;
+    };
+  });
+
   if (name && SKINS[name] && !/[?&]skin=off\b/.test(location.search)) window.stgSkin = SKINS[name];
 })();

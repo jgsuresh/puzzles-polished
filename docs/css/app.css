@@ -262,6 +262,20 @@ body.page-puzzle { overflow: hidden; overscroll-behavior: none; }
   box-shadow: var(--shadow);
 }
 .tapmodes[hidden], .keypad[hidden] { display: none; }
+.aids-top { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.aidtoggle {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow);
+  font-size: 0.85rem; font-weight: 600; color: var(--muted);
+}
+.aidtoggle .swatches { display: inline-flex; }
+.aidtoggle .swatches i { width: 9px; height: 14px; border-radius: 3px; margin-right: -2px; border: 1px solid var(--surface); }
+.aidtoggle .swatches i:nth-child(1) { background: #e0457b; }
+.aidtoggle .swatches i:nth-child(2) { background: #f2a900; }
+.aidtoggle .swatches i:nth-child(3) { background: #2fa56a; }
+.aidtoggle .swatches i:nth-child(4) { background: #4f7cff; }
+.aidtoggle[aria-pressed="true"] { border-color: var(--accent); color: var(--text, inherit); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
 .tapmodes button {
   border: 0;
   padding: 7px 16px;

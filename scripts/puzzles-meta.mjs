@@ -15,11 +15,13 @@ export const CATEGORIES = [
 // keypad:   'digits' | 'dpad' | 'undead' - on-screen keys for touch screens.
 // pencil:   keypad gets a pencil-mark toggle (sends 'M').
 export const META = {
-  solo: { category: 'numbers', keypad: 'digits', pencil: true },
-  keen: { category: 'numbers', keypad: 'digits', pencil: true },
-  towers: { category: 'numbers', keypad: 'digits', pencil: true },
-  unequal: { category: 'numbers', keypad: 'digits', pencil: true },
-  filling: { category: 'numbers', keypad: 'digits' },
+  // modes pen/pencil/erase (digit games): pencil = right button, erase = tap a cell then clear it.
+  // digitColours: offer a "colour each digit" toggle (drawn by skins.js).
+  solo: { category: 'numbers', keypad: 'digits', pencil: true, modes: ['pen', 'pencil', 'erase'], digitColours: true },
+  keen: { category: 'numbers', keypad: 'digits', pencil: true, modes: ['pen', 'pencil', 'erase'], digitColours: true },
+  towers: { category: 'numbers', keypad: 'digits', pencil: true, modes: ['pen', 'pencil', 'erase'], digitColours: true },
+  unequal: { category: 'numbers', keypad: 'digits', pencil: true, modes: ['pen', 'pencil', 'erase'], digitColours: true },
+  filling: { category: 'numbers', keypad: 'digits', modes: ['pen', 'erase'], digitColours: true },
   range: { category: 'numbers' },
   singles: { category: 'numbers' },
   dominosa: { category: 'numbers' },
